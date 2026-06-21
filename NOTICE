@@ -1,0 +1,17 @@
+trugs-web — a one-way, passive web-to-TRUG builder
+Copyright 2026 TRUGS LLC
+
+Licensed under the Apache License, Version 2.0.
+
+PATENT NOTICE
+
+This license covers a ONE-WAY, PASSIVE tool: trugs-web crawls web sources and builds
+passive TRUGS knowledge graphs. It does NOT close the self-developing loop.
+
+This license does NOT cover self-developing graph systems. Graph structures or substrates
+that an agent traverses and self-modifies in place during execution — with no compile
+boundary between a modification and its effect on subsequent traversal — are the subject of
+U.S. patent application 19/575,491 (EGS-979). A downstream user who wires this tool's passive
+output into a self-modifying agent is operating outside this grant. See
+https://github.com/Xepayac/XEPAYAC_LLC for AGPL 3.0 and commercial licensing of the reserved
+mechanism.

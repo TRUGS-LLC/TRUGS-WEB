@@ -1,0 +1,136 @@
+{
+  "name": "TRUGS-WEB-TOOLS",
+  "version": "2.0.0",
+  "type": "MODULE",
+  "description": "TRUGS web research tool — crawl web sources and build passive TRUGS knowledge graphs. One-way and passive: it builds graphs, it never closes the self-developing loop. Single `trugs-web` binary.",
+  "dimensions": {
+    "repo_structure": {
+      "description": "Repository structure",
+      "base_level": "BASE"
+    },
+    "folder_structure": {
+      "description": "Filesystem cartography (trug-a-folder sync)",
+      "base_level": "BASE"
+    }
+  },
+  "capabilities": {
+    "extensions": [],
+    "vocabularies": [],
+    "profiles": []
+  },
+  "nodes": [
+    {
+      "id": "TRUGS-WEB-TOOLS_root",
+      "type": "MODULE",
+      "properties": {
+        "name": "TRUGS-WEB-TOOLS",
+        "stale": true,
+        "stale_reason": "file not found on disk",
+        "stale_since": "2026-06-17T16:00:41.992178+00:00",
+        "stale_count": 1
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "DEKA_MODULE",
+      "dimension": "repo_structure"
+    },
+    {
+      "id": "doc_claude",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "CLAUDE.md",
+        "purpose": "Claude documentation",
+        "format": "markdown"
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_readme",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "README.md",
+        "purpose": "Human quickstart and motivation",
+        "format": "markdown"
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "doc_state_of_repo",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "STATE_OF_REPO.md",
+        "purpose": "State Of Repo documentation",
+        "format": "markdown"
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "comp_deferred_phase2",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "deferred_phase2",
+        "purpose": "Deferred Phase2 component",
+        "file_count": 8,
+        "loc": 1463
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "comp_src",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "src",
+        "purpose": "Src component",
+        "file_count": 14,
+        "loc": 2877
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "test_suite",
+      "type": "TEST_SUITE",
+      "properties": {
+        "name": "tests/",
+        "purpose": "Test suite",
+        "test_files": 13,
+        "test_count": 13,
+        "test_count_source": "fallback_file_count"
+      },
+      "parent_id": null,
+      "contains": [],
+      "metric_level": "BASE_TEST_SUITE",
+      "dimension": "folder_structure"
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "test_suite",
+      "to_id": "comp_deferred_phase2",
+      "relation": "tests",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "test_suite",
+      "to_id": "comp_src",
+      "relation": "tests",
+      "weight": 1.0,
+      "properties": {}
+    }
+  ]
+}

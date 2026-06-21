@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least-privilege token. gitleaks-action's PR mode lists the PR's commits via the
+# API, which needs pull-requests:read (the repo's restricted default grants only
+# contents:read → "Resource not accessible by integration").
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - name: ruff format
+        run: ruff format --check src/trugs_web tests
+      - name: ruff lint
+        run: ruff check src/trugs_web tests
+
+  typecheck:
+    runs-on: ubuntu-latest
+    # Enforced: mypy (config in pyproject [tool.mypy]) must pass. The v1 engine's type
+    # debt was paid down in the SP3–SP5 PR (#6) — keep it green.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install mypy -e ".[test]"
+      - run: mypy src/trugs_web
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: install (editable, with test extras)
+        run: pip install -e ".[test]"   # trugs-tools/trugs-store 2.0.0 final on PyPI
+      - name: pytest (v1 suite)
+        run: pytest -q tests
