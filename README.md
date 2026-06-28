@@ -20,6 +20,8 @@ As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depen
 
 ## Quick Example
 
+> **Network + LLM required** — `build_graph` crawls the seed URLs over the live web. For a no-network, no-LLM run on a shipped graph, see [below](#offline-quickstart).
+
 ```python
 import asyncio
 from trugs_web import build_graph, load_graph, query_graph, generate_report
@@ -50,22 +52,32 @@ asyncio.run(main())
 
 **Requirements:** Python ≥ 3.11
 
+Install from source (directly from GitHub):
+
 ```bash
 # Minimal (graph building + querying, no crawling or LLM)
-pip install trugs-web
+pip install "git+https://github.com/TRUGS-LLC/TRUGS-WEB.git"
 
 # With web crawling (httpx, beautifulsoup4, lxml)
-pip install "trugs-web[web]"
+pip install "trugs-web[web] @ git+https://github.com/TRUGS-LLC/TRUGS-WEB.git"
 
 # With LLM support (anthropic, openai)
-pip install "trugs-web[llm]"
-
-# Both
-pip install "trugs-web[web,llm]"
+pip install "trugs-web[llm] @ git+https://github.com/TRUGS-LLC/TRUGS-WEB.git"
 
 # Verify
 trugs-web --version
 ```
+
+## Offline Quickstart
+
+Try it with **no network and no LLM** on the shipped example graph ([`example.trug.json`](example.trug.json)):
+
+```bash
+trugs-web query example.trug.json --q "GraphRAG"
+trugs-web synthesize example.trug.json --q "GraphRAG"
+```
+
+The `crawl`/`build` verbs fetch live web sources; the `query`/`synthesize` verbs above run entirely offline on an existing graph.
 
 ## Usage
 
@@ -113,27 +125,21 @@ Every verb documents examples and options: `trugs-web <verb> --help`.
 ## Library Use
 
 ```python
-from trugs_web import (
-    build_graph,            # async; orchestrates the full pipeline
-    load_graph,             # load a .trug.json file
-    query_graph,            # traverse and filter
-    generate_report,        # async; synthesize markdown
-    TRUGSWebGraphBuilder,   # low-level graph construction
-    EntityExtractor,        # LLM-backed entity extraction
-    EntityResolver,         # cross-reference deduplication
-    CredibilityScorer,      # topology-aware scoring
-)
+from trugs_web import build_graph, load_graph, query_graph, generate_report
 
-# Programmatic graph building
-builder = TRUGSWebGraphBuilder(name="myresearch", topic="my topic")
-await builder.build("https://example.com", llm_provider="mock")
-builder.save("output.trug.json", validate=True)
+# build_graph (async) crawls the seed URLs over the live web and writes a passive graph:
+#   builder = await build_graph(topic="...", seed_urls=[...], llm_provider="mock",
+#                               output_path="out.trug.json")
 
-# Validation (graph_builder uses trugs_tools.validator internally)
-graph = load_graph("output.trug.json")
-from trugs_tools.validator import validate_trug
-validate_trug(graph)  # raises if invalid
+# load_graph / query_graph operate OFFLINE on an existing graph:
+graph = load_graph("example.trug.json")          # the shipped fixture
+results = query_graph(graph, "GraphRAG", min_weight=0.5)
+print(results)
+
+# generate_report (async) renders a markdown report; it is also the `trugs-web synthesize` CLI verb.
 ```
+
+Graph validation uses `trugs_tools.validator` internally — `TRUGSWebGraphBuilder.save(..., validate=True)` writes and validates in one step.
 
 ## Documentation
 
