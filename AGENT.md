@@ -69,7 +69,7 @@ class LLMClient(Protocol):
 | `extractor.EntityExtractor` | `extract(source: Source)` | Uses `llm.complete()` to parse entities from content. |
 | `extractor.RelationExtractor` | `extract(sources: list[Source])` | Uses `llm.complete()` to infer relations between entities. |
 | `extractor.CitationExtractor` | `extract(sources: list[Source])` | Uses `llm.complete()` to extract bibliographic citations. |
-| `query.synthesize.ReportSynthesizer` | `synthesize(graph, query)` | Uses `llm.complete()` to render markdown reports (Phase 2 deferred). |
+| `query.synthesize.ReportSynthesizer` | `synthesize(graph, query)` | Uses `llm.complete()` (or a non-LLM fallback) to render markdown reports — shipped in v1 as the `trugs-web synthesize` verb. |
 
 ## Safety Rails (Tier-B)
 

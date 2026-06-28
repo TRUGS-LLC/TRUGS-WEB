@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code when working in this repository.
 
-## Protected Paths — Never Modify
+## License — do not alter the terms
 
-- `LICENSE` — Proprietary. Do not modify.
+- `LICENSE` is **Apache-2.0**; `NOTICE` carries the patent carve-out (US app 19/575,491 + the Xepayac AGPL/commercial pointer for the reserved self-developing-graph mechanism). Preserve both verbatim; do not change the license terms.
 
 ## Development Workflow
 
@@ -27,11 +27,10 @@ Prohibited actions:
 
 ### Use TRL Vocabulary When Writing TRUGs
 
-When creating or editing any .trug.json file, use edge relations and node types from the TRUGS Language (TRL) 190-word vocabulary. See https://github.com/TRUGS-LLC/TRUGS-AGENT for the full framework.
+When creating or editing any `.trug.json` file, use edge relations and node types from the TRUGS Language (TRL) vocabulary. See [TRUGS-LLC/TRUGS](https://github.com/TRUGS-LLC/TRUGS) for the specification.
 
 ## Navigation
 
 - Start with `folder.trug.json` for machine-readable structure
-- `README.md` for human quickstart
-- This repo is tracked by the EPIC at `Xepayac/TRUGS-DEVELOPMENT/TRUGS_EPIC/project.trug.json`
-
+- `README.md` for the human quickstart
+- This repo is part of the public TRUGS-LLC commons; release-polish is tracked in `Xepayac/TRUGS-DEVELOPMENT`.

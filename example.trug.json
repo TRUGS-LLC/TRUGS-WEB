@@ -1,0 +1,95 @@
+{
+  "name": "graph-rag-landscape",
+  "version": "1.0.0",
+  "type": "RESEARCH",
+  "dimensions": {
+    "web_structure": {
+      "description": "graph-based retrieval for LLMs",
+      "base_level": "BASE"
+    }
+  },
+  "capabilities": {
+    "extensions": [],
+    "vocabularies": [
+      "research_v1"
+    ],
+    "profiles": []
+  },
+  "nodes": [
+    {
+      "id": "research_graph_graph_rag_landscape",
+      "type": "RESEARCH_GRAPH",
+      "properties": {
+        "name": "graph-rag-landscape",
+        "topic": "graph-based retrieval for LLMs",
+        "description": "",
+        "created_date": "2026-06-27"
+      },
+      "metric_level": "KILO_RESEARCH_GRAPH",
+      "parent_id": null,
+      "contains": [],
+      "dimension": "web_structure"
+    },
+    {
+      "id": "graphrag",
+      "type": "CONCEPT",
+      "properties": {
+        "name": "GraphRAG",
+        "description": "Graph-based retrieval augmented generation for LLMs.",
+        "credibility": 0.85
+      },
+      "metric_level": "BASE_CONCEPT",
+      "parent_id": null,
+      "contains": [],
+      "dimension": "web_structure"
+    },
+    {
+      "id": "langchain",
+      "type": "PROJECT",
+      "properties": {
+        "name": "LangChain",
+        "url": "https://github.com/langchain-ai/langchain",
+        "description": "LLM application framework.",
+        "credibility": 0.9
+      },
+      "metric_level": "BASE_PROJECT",
+      "parent_id": null,
+      "contains": [],
+      "dimension": "web_structure"
+    },
+    {
+      "id": "neo4j",
+      "type": "PROJECT",
+      "properties": {
+        "name": "Neo4j",
+        "url": "https://neo4j.com",
+        "description": "Graph database commonly paired with GraphRAG.",
+        "credibility": 0.95
+      },
+      "metric_level": "BASE_PROJECT",
+      "parent_id": null,
+      "contains": [],
+      "dimension": "web_structure"
+    }
+  ],
+  "edges": [
+    {
+      "from_id": "langchain",
+      "to_id": "graphrag",
+      "relation": "DEFINES",
+      "weight": 0.9
+    },
+    {
+      "from_id": "neo4j",
+      "to_id": "graphrag",
+      "relation": "DEFINES",
+      "weight": 0.85
+    },
+    {
+      "from_id": "langchain",
+      "to_id": "neo4j",
+      "relation": "INTEGRATES",
+      "weight": 0.7
+    }
+  ]
+}

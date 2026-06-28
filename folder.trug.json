@@ -1,134 +1,276 @@
 {
-  "name": "TRUGS-WEB-TOOLS",
+  "name": "TRUGS-WEB Folder",
   "version": "2.0.0",
-  "type": "MODULE",
-  "description": "TRUGS web research tool — crawl web sources and build passive TRUGS knowledge graphs. One-way and passive: it builds graphs, it never closes the self-developing loop. Single `trugs-web` binary.",
+  "type": "PROJECT",
+  "description": "TRUGS web research tool \u2014 crawl web sources and build passive TRUGS knowledge graphs. One-way and passive: it builds graphs, it never closes the self-developing loop. Single `trugs-web` binary. Apache-2.0.",
   "dimensions": {
-    "repo_structure": {
-      "description": "Repository structure",
-      "base_level": "BASE"
-    },
     "folder_structure": {
-      "description": "Filesystem cartography (trug-a-folder sync)",
+      "description": "Folder contents and their relationships",
       "base_level": "BASE"
     }
   },
   "capabilities": {
     "extensions": [],
-    "vocabularies": [],
+    "vocabularies": [
+      "project_v1"
+    ],
     "profiles": []
   },
   "nodes": [
     {
-      "id": "TRUGS-WEB-TOOLS_root",
-      "type": "MODULE",
+      "id": "trugs_web_folder",
+      "type": "FOLDER",
       "properties": {
-        "name": "TRUGS-WEB-TOOLS",
-        "stale": true,
-        "stale_reason": "file not found on disk",
-        "stale_since": "2026-06-17T16:00:41.992178+00:00",
-        "stale_count": 1
+        "name": "TRUGS-WEB",
+        "purpose": "Root folder for TRUGS-WEB",
+        "phase": "ACTIVE",
+        "status": "ACTIVE"
       },
       "parent_id": null,
-      "contains": [],
-      "metric_level": "DEKA_MODULE",
-      "dimension": "repo_structure"
+      "contains": [
+        "agent_md",
+        "architecture_md",
+        "changelog_md",
+        "claude_md",
+        "license",
+        "notice",
+        "readme_md",
+        "deferred_phase2",
+        "example_trug_json",
+        "pyproject_toml",
+        "src",
+        "tests"
+      ],
+      "metric_level": "KILO_FOLDER",
+      "dimension": "folder_structure"
     },
     {
-      "id": "doc_claude",
+      "id": "agent_md",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "AGENT.md",
+        "purpose": "File: AGENT.md"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "architecture_md",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "ARCHITECTURE.md",
+        "purpose": "File: ARCHITECTURE.md"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "changelog_md",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "CHANGELOG.md",
+        "purpose": "File: CHANGELOG.md"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "claude_md",
       "type": "DOCUMENT",
       "properties": {
         "name": "CLAUDE.md",
-        "purpose": "Claude documentation",
-        "format": "markdown"
+        "purpose": "File: CLAUDE.md"
       },
-      "parent_id": null,
+      "parent_id": "trugs_web_folder",
       "contains": [],
       "metric_level": "BASE_DOCUMENT",
       "dimension": "folder_structure"
     },
     {
-      "id": "doc_readme",
+      "id": "license",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "LICENSE",
+        "purpose": "File: LICENSE"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "notice",
+      "type": "COMPONENT",
+      "properties": {
+        "name": "NOTICE",
+        "purpose": "File: NOTICE"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "DEKA_COMPONENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "readme_md",
       "type": "DOCUMENT",
       "properties": {
         "name": "README.md",
-        "purpose": "Human quickstart and motivation",
-        "format": "markdown"
+        "purpose": "File: README.md"
       },
-      "parent_id": null,
+      "parent_id": "trugs_web_folder",
       "contains": [],
       "metric_level": "BASE_DOCUMENT",
       "dimension": "folder_structure"
     },
     {
-      "id": "doc_state_of_repo",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "STATE_OF_REPO.md",
-        "purpose": "State Of Repo documentation",
-        "format": "markdown"
-      },
-      "parent_id": null,
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "comp_deferred_phase2",
-      "type": "COMPONENT",
+      "id": "deferred_phase2",
+      "type": "FOLDER",
       "properties": {
         "name": "deferred_phase2",
-        "purpose": "Deferred Phase2 component",
-        "file_count": 8,
-        "loc": 1463
+        "purpose": "Directory: deferred_phase2"
       },
-      "parent_id": null,
+      "parent_id": "trugs_web_folder",
       "contains": [],
-      "metric_level": "DEKA_COMPONENT",
+      "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
     },
     {
-      "id": "comp_src",
-      "type": "COMPONENT",
+      "id": "example_trug_json",
+      "type": "SPECIFICATION",
+      "properties": {
+        "name": "example.trug.json",
+        "purpose": "File: example.trug.json"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "BASE_SPECIFICATION",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "pyproject_toml",
+      "type": "DOCUMENT",
+      "properties": {
+        "name": "pyproject.toml",
+        "purpose": "File: pyproject.toml"
+      },
+      "parent_id": "trugs_web_folder",
+      "contains": [],
+      "metric_level": "BASE_DOCUMENT",
+      "dimension": "folder_structure"
+    },
+    {
+      "id": "src",
+      "type": "FOLDER",
       "properties": {
         "name": "src",
-        "purpose": "Src component",
-        "file_count": 14,
-        "loc": 2877
+        "purpose": "Directory: src"
       },
-      "parent_id": null,
+      "parent_id": "trugs_web_folder",
       "contains": [],
-      "metric_level": "DEKA_COMPONENT",
+      "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
     },
     {
-      "id": "test_suite",
-      "type": "TEST_SUITE",
+      "id": "tests",
+      "type": "FOLDER",
       "properties": {
-        "name": "tests/",
-        "purpose": "Test suite",
-        "test_files": 13,
-        "test_count": 13,
-        "test_count_source": "fallback_file_count"
+        "name": "tests",
+        "purpose": "Directory: tests"
       },
-      "parent_id": null,
+      "parent_id": "trugs_web_folder",
       "contains": [],
-      "metric_level": "BASE_TEST_SUITE",
+      "metric_level": "KILO_FOLDER",
       "dimension": "folder_structure"
     }
   ],
   "edges": [
     {
-      "from_id": "test_suite",
-      "to_id": "comp_deferred_phase2",
-      "relation": "tests",
+      "from_id": "trugs_web_folder",
+      "to_id": "agent_md",
+      "relation": "contains",
       "weight": 1.0,
       "properties": {}
     },
     {
-      "from_id": "test_suite",
-      "to_id": "comp_src",
-      "relation": "tests",
+      "from_id": "trugs_web_folder",
+      "to_id": "architecture_md",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "changelog_md",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "claude_md",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "license",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "notice",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "readme_md",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "deferred_phase2",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "example_trug_json",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "pyproject_toml",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "src",
+      "relation": "contains",
+      "weight": 1.0,
+      "properties": {}
+    },
+    {
+      "from_id": "trugs_web_folder",
+      "to_id": "tests",
+      "relation": "contains",
       "weight": 1.0,
       "properties": {}
     }
