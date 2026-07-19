@@ -2,7 +2,7 @@
 
 ## Overview
 
-**trugs-web v1** is a ONE-WAY, passive web-to-TRUG builder. It crawls web sources, extracts entities and relations via LLM (model-agnostic: Anthropic, OpenAI, or mock), resolves duplicates, scores credibility, and emits a passive TRUGS 1.0 knowledge graph for querying. It **never closes the self-developing loop** — the reserved patent mechanism (U.S. app 19/575,491).
+**trugs-web v1** is a ONE-WAY, passive web-to-TRUG builder. It crawls web sources, extracts entities and relations via LLM (model-agnostic: Anthropic, OpenAI, or mock), resolves duplicates, scores credibility, and emits a passive TRUGS knowledge graph for querying. It **never closes the self-developing loop** — the reserved patent mechanism (U.S. app 19/575,491).
 
 - **Type:** T2 reference application (sibling of `trugs-folder`)
 - **Dependencies:** T1 commons (`trugs-tools>=2.0.0`, `trugs-store>=2.0.0`)
@@ -32,7 +32,7 @@ CREDIBILITY (domain quality, peer-review, author, recency)
    ↓
 GRAPH_BUILDER (validate via trugs_tools.validator.validate_trug)
    ↓
-   TRUGS 1.0 graph {name, version, nodes[], edges[], dimensions}
+   TRUGS graph {name, version, nodes[], edges[], dimensions}
    ↓
 QUERY (loader, traverse, synthesize)
    ↓
@@ -74,8 +74,8 @@ QUERY (loader, traverse, synthesize)
 
 | Class / Function | Role |
 |---|---|
-| `Entity` | Dataclass: `{id, name, entity_type, description, aliases[], source_url, metadata}`. Types: `CONCEPT`, `AUTHOR`, `CLAIM`, `TOOL`, `PROJECT`, `PAPER`, `URL`. Method: `.to_node()` → TRUGS 1.0 node. |
-| `Relation` | Dataclass: `{from_id, to_id, relation_type, evidence, confidence, source_url}`. Method: `.to_edge()` → TRUGS 1.0 edge. |
+| `Entity` | Dataclass: `{id, name, entity_type, description, aliases[], source_url, metadata}`. Types: `CONCEPT`, `AUTHOR`, `CLAIM`, `TOOL`, `PROJECT`, `PAPER`, `URL`. Method: `.to_node()` → TRUGS node. |
+| `Relation` | Dataclass: `{from_id, to_id, relation_type, evidence, confidence, source_url}`. Method: `.to_edge()` → TRUGS edge. |
 | `LLMClient` (Protocol) | Interface: `async complete(prompt: str, max_tokens: int) → str`. Implemented by: `MockLLMClient`, `AnthropicClient`, `OpenAIClient`. |
 | `EntityExtractor` | Async: `await extractor.extract(source: Source) → Entity[]`. Sends LLM prompt, parses JSON response. |
 | `RelationExtractor` | Async: `await extractor.extract(source: Source) → Relation[]`. |
@@ -100,7 +100,7 @@ QUERY (loader, traverse, synthesize)
 
 | Class / Function | Role |
 |---|---|
-| `ResolvedEntity` | Dataclass: `{id, canonical_name, entity_type, description, aliases[], source_urls[], mention_count, metadata}`. Merged view of an entity. Method: `.to_node()` → TRUGS 1.0 node. |
+| `ResolvedEntity` | Dataclass: `{id, canonical_name, entity_type, description, aliases[], source_urls[], mention_count, metadata}`. Merged view of an entity. Method: `.to_node()` → TRUGS node. |
 | `EntityResolver` | `resolve(entities: Entity[]) → ResolvedEntity[]`. Uses string similarity (≥0.85 by default) + known alias dict (e.g., `"langchain"` ↔ `"lang chain"`). Groups duplicates, picks canonical. |
 | `CrossReferenceMapper` | Builds bidirectional mapping: `entity_id ↔ canonical_id`. Enables relation rewriting post-merge. |
 
@@ -137,18 +137,18 @@ QUERY (loader, traverse, synthesize)
 
 ### 5. **Graph Builder** (`src/trugs_web/graph_builder.py`)
 
-**Purpose:** Orchestrate pipeline and emit TRUGS 1.0 graphs.
+**Purpose:** Orchestrate pipeline and emit TRUGS graphs.
 
 | Class / Function | Role |
 |---|---|
-| `TRUGSWebGraphBuilder` | Stateful builder. Constructor: `__init__(name: str, topic: str, description: str)`. Creates root `RESEARCH_GRAPH` node. Methods: `.add_source_node(source, credibility)`, `.add_entity(entity)`, `.add_relation(from_id, to_id, relation, weight)`, `.validate()`, `.save(filepath, validate=True)`. Returns graph conforming to TRUGS 1.0 schema. |
+| `TRUGSWebGraphBuilder` | Stateful builder. Constructor: `__init__(name: str, topic: str, description: str)`. Creates root `RESEARCH_GRAPH` node. Methods: `.add_source_node(source, credibility)`, `.add_entity(entity)`, `.add_relation(from_id, to_id, relation, weight)`, `.validate()`, `.save(filepath, validate=True)`. Returns graph conforming to TRUGS schema. |
 | `_WebPipeline` (internal) | Orchestrates crawl → extract → resolve → score → graph. Runs async: `await pipeline.run(topic, seed_urls) → TRUGSWebGraphBuilder`. |
 | `build_graph(topic, seed_urls, provider, ...)` | High-level async entry: `await build_graph(...) → dict` (the graph). Calls `_WebPipeline`, validates, returns. |
 | `load_graph(filepath: str) → dict` | Deserialize `.trug.json`. |
 | `url_to_id(url) → str` | Hash URL to safe ID. |
 | `make_id(text) → str` | Slugify text to safe ID (lowercase, alphanumeric + underscore). |
 
-**Graph structure (TRUGS 1.0 envelope):**
+**Graph structure (TRUGS envelope):**
 ```json
 {
   "name": "research_graph_acupuncture",
@@ -284,7 +284,7 @@ include = ["trugs_web*"]  # deferred_phase2/ NOT included
 
 ## Emitted TRUG Envelope
 
-Every graph emitted by `TRUGSWebGraphBuilder.save()` conforms to **TRUGS 1.0 schema** and passes `trugs_tools.validator.validate_trug()`:
+Every graph emitted by `TRUGSWebGraphBuilder.save()` conforms to **TRUGS schema** and passes `trugs_tools.validator.validate_trug()`:
 
 ```python
 {
@@ -371,7 +371,7 @@ trugs-web synthesize <graph.trug.json> --q '<query>' [--out <path>]
 **Test infrastructure:**
 - **respx:** HTTP mocking (replaces httpx calls). No real HTTP.
 - **MockLLMClient:** No API keys needed. Returns synthetic JSON.
-- **Fixtures:** `sample_graph_dict`, `sample_graph` (conftest.py). Minimal TRUGS 1.0 graph for query tests.
+- **Fixtures:** `sample_graph_dict`, `sample_graph` (conftest.py). Minimal TRUGS graph for query tests.
 - **Monkeypatch:** Env var isolation, spy on trugs_tools.validator.
 
 **Example test:**

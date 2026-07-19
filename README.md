@@ -4,7 +4,7 @@
 
 ## What & Why
 
-`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS 1.0 format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. This boundary is licensed: the reserved patent (US 19/575,491) protects self-modifying graph substrates. A downstream user who wires this tool's passive output into a self-modifying agent operates outside this grant.
+`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. This boundary is licensed: the reserved patent (US 19/575,491) protects self-modifying graph substrates. A downstream user who wires this tool's passive output into a self-modifying agent operates outside this grant.
 
 As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depends downward on the T1 commons: `trugs-tools>=2.0.0` (language, validator) and `trugs-store>=2.0.0` (graph persistence). v1 ships the ingestion pipeline (crawler, extractor, resolver, credibility scorer, graph builder), query subsystem (loader, traverse, synthesize), and weight computation (topology-based importance ranking). Hub federation and refresh are deferred to Phase 2 (see `deferred_phase2/`).
 
@@ -14,7 +14,7 @@ As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depen
 - **Entity & relation extraction**: LLM-backed NLP (model-agnostic; use Anthropic Claude, OpenAI GPT, or mock for testing)
 - **Cross-reference resolution**: deduplicate entities across sources by name, description, and context
 - **Credibility scoring**: topology-aware confidence weights on nodes and edges
-- **TRUGS 1.0 graph output**: validated against `trugs_tools.validator.validate_trug`; query-ready JSON
+- **TRUGS graph output**: validated against `trugs_tools.validator.validate_trug`; query-ready JSON
 - **Query & traverse**: load a graph, traverse by relation type, filter by weight threshold, synthesize findings into markdown reports
 - **Safety rails**: secrets from environment (never inline), LLM cost guard, inter-request delays, structured logging
 
@@ -100,7 +100,7 @@ trugs-web build https://example.com/research \
   --out acupuncture.trug.json
 ```
 
-Full pipeline: discovers sources, extracts entities/relations via LLM, resolves duplicates, scores credibility, writes a TRUGS 1.0 JSON graph. Requires `$ANTHROPIC_API_KEY` or `$OPENAI_API_KEY` in the environment (provider-dependent).
+Full pipeline: discovers sources, extracts entities/relations via LLM, resolves duplicates, scores credibility, writes a TRUGS JSON graph. Requires `$ANTHROPIC_API_KEY` or `$OPENAI_API_KEY` in the environment (provider-dependent).
 
 ### `query` — Traverse and find within a built graph
 
