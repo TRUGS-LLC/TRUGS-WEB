@@ -13,9 +13,9 @@ src/trugs_web/
 ├── extractor.py          # LLM-powered entity/relation extraction (Protocol-based)
 ├── resolver.py           # Entity deduplication & cross-reference mapping
 ├── credibility.py        # Source credibility scoring
-├── graph_builder.py      # Orchestrate pipeline; emit TRUGS 1.0 validated by trugs_tools
+├── graph_builder.py      # Orchestrate pipeline; emit TRUGS graphs validated by trugs_tools
 ├── query/
-│   ├── loader.py         # Load TRUGS 1.0 graphs from disk
+│   ├── loader.py         # Load TRUGS graphs from disk
 │   ├── traverse.py       # Graph traversal; query by concept, source, relation
 │   └── synthesize.py     # Markdown report generation (async, LLM-backed)
 └── weight/
@@ -165,14 +165,14 @@ pytest tests/ --cov=src/trugs_web --cov-report=term-missing
 
 ### Test Fixtures
 
-- `conftest.py`: `sample_graph_dict`, `sample_graph` (TRUGS 1.0 test data with credibility).
+- `conftest.py`: `sample_graph_dict`, `sample_graph` (TRUGS test data with credibility).
 - `test_web_cli.py`: CLI argument parsing and verb dispatch.
 - `test_web_safety_rails.py`: Cost guard, rate limit, secrets, logging.
 - `test_web_crawler.py`: robots.txt, link extraction, rate limiting.
 - `test_web_extractor.py`: Entity/relation/citation extraction with `MockLLMClient`.
 - `test_web_resolver.py`: Entity deduplication and cross-reference mapping.
 - `test_web_credibility.py`: Credibility scoring and edge weighting.
-- `test_web_graph_builder.py`: Pipeline orchestration, TRUGS 1.0 schema validation.
+- `test_web_graph_builder.py`: Pipeline orchestration, TRUGS schema validation.
 - `test_web_query_*.py`: Graph loading, traversal, report synthesis.
 
 ## One-Way, Passive Invariant
@@ -227,7 +227,7 @@ grep -n "class.*Client" src/trugs_web/extractor.py
 grep -rn "CostGuard\|resolve_api_key\|get_logger\|backoff_delay" src/trugs_web/
 ```
 
-### Find TRUGS 1.0 Validation
+### Find TRUGS Validation
 
 ```bash
 grep -rn "validate_trug\|trugs_tools.validator" src/trugs_web/
@@ -249,7 +249,7 @@ grep -A 5 "def __init__.*llm" src/trugs_web/extractor.py
 ## Dependencies
 
 **Required (T1 commons, downward only):**
-- `trugs-tools>=2.0.0` (language core, TRUGS 1.0 schema, validator)
+- `trugs-tools>=2.0.0` (language core, TRUGS schema, validator)
 - `trugs-store>=2.0.0` (graph persistence)
 
 **Optional:**
