@@ -1,4 +1,4 @@
-"""Tests for trugs_web.graph_builder — TRUGS 1.0 graph building module."""
+"""Tests for trugs_web.graph_builder — TRUGS graph building module."""
 
 import json
 import pytest
@@ -25,7 +25,7 @@ class TestTRUGSWebGraphBuilder:
         builder = TRUGSWebGraphBuilder(name="test-graph", topic="testing")
         graph = builder.to_dict()
 
-        # Required TRUGS 1.0 root fields
+        # Required TRUGS root fields
         assert "name" in graph
         assert "version" in graph
         assert graph["version"] == "1.0.0"
@@ -198,8 +198,8 @@ class TestTRUGSWebGraphBuilder:
         assert len(contains_edges) >= 1
 
 
-class TestTRUGS10Compliance:
-    """Verify TRUGS 1.0 format compliance via validator."""
+class TestTRUGSCompliance:
+    """Verify TRUGS format compliance via validator."""
 
     def test_graph_passes_validator(self):
         builder = TRUGSWebGraphBuilder(name="compliance-test", topic="AI research")
@@ -251,7 +251,7 @@ class TestTRUGS10Compliance:
 
 @pytest.mark.asyncio
 async def test_build_graph_empty_seeds():
-    """build_graph with no seed URLs returns valid TRUGS 1.0 graph."""
+    """build_graph with no seed URLs returns valid TRUGS graph."""
     builder = await build_graph(topic="test topic", seed_urls=[], llm_provider="mock")
     assert isinstance(builder, TRUGSWebGraphBuilder)
     graph = builder.to_dict()
@@ -259,14 +259,14 @@ async def test_build_graph_empty_seeds():
     assert graph["version"] == "1.0.0"
     assert graph["type"] == "RESEARCH"
 
-    # Validate TRUGS 1.0 compliance
+    # Validate TRUGS compliance
     result = validate_trug(graph)
     assert result.valid, f"Errors: {result.errors}"
 
 
 @pytest.mark.asyncio
 async def test_build_graph_with_respx():
-    """build_graph discovers sources and builds a valid TRUGS 1.0 graph."""
+    """build_graph discovers sources and builds a valid TRUGS graph."""
     import respx
     import httpx
 

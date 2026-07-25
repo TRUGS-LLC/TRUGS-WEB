@@ -7,7 +7,7 @@ from trugs_web.query.loader import GraphLoader
 
 
 def _make_trugs_graph():
-    """Build a minimal TRUGS 1.0 graph dict for testing."""
+    """Build a minimal TRUGS graph dict for testing."""
     builder = TRUGSWebGraphBuilder(name="test-graph", topic="testing")
 
     # Manually inject nodes with credibility in properties

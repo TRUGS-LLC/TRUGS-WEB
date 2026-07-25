@@ -25,8 +25,11 @@ classifiers = [
 # T2 sits ABOVE T1: depends on the language core (trugs-tools) + the graph store
 # (trugs-store). It NEVER depends on any T3 system package (the AAA #2358 cleave invariant).
 dependencies = [
-    "trugs-tools>=2.0.0",
-    "trugs-store>=2.0.0",
+    "trugs-tools>=2.0.0,<3.0.0",
+    # Declared even though nothing in this package imports it directly: trugs-tools
+    # requires trugs-store and declares it unbounded, so this line is what carries
+    # the upper bound for trugs-store. Removing it would silently un-bound it.
+    "trugs-store>=2.0.0,<3.0.0",
 ]
 
 [project.optional-dependencies]

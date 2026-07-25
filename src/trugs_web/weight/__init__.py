@@ -6,7 +6,7 @@ loaded TRUGs.  All computations are read-time — never stored.
 
 Usage::
 
-    from trugs_tools.web.weight import (
+    from trugs_web.weight import (
         NodeTopology,
         compute_topology,
         rank_by_importance,
