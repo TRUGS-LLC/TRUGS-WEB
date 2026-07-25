@@ -37,7 +37,7 @@ class Entity:
     metadata: dict = field(default_factory=dict)
 
     def to_node(self) -> dict:
-        """Convert to TRUGS 1.0 node format."""
+        """Convert to TRUGS node format."""
         metric_level = _entity_metric_level(self.entity_type)
         return {
             "id": self.id,
@@ -67,7 +67,7 @@ class Relation:
     source_url: str = ""
 
     def to_edge(self) -> dict:
-        """Convert to TRUGS 1.0 edge format."""
+        """Convert to TRUGS edge format."""
         return {
             "from_id": self.from_id,
             "to_id": self.to_id,
@@ -77,7 +77,7 @@ class Relation:
 
 
 def _entity_metric_level(entity_type: str) -> str:
-    """Map entity type to TRUGS 1.0 metric level."""
+    """Map entity type to TRUGS metric level."""
     centi_types = {"CLAIM", "STATEMENT", "RESULT"}
     if entity_type in centi_types:
         return f"CENTI_{entity_type}"

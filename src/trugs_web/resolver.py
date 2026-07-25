@@ -26,7 +26,7 @@ class ResolvedEntity:
     metadata: dict = field(default_factory=dict)
 
     def to_node(self) -> dict:
-        """Convert to TRUGS 1.0 node format."""
+        """Convert to TRUGS node format."""
         metric_level = _entity_metric_level(self.entity_type)
         return {
             "id": self.id,

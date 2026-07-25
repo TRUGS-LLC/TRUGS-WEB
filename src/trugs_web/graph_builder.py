@@ -2,7 +2,7 @@
 TRUGS Web Graph Builder
 
 Orchestrates the Phase 1 pipeline (discover → extract → resolve → score)
-and emits TRUGS 1.0-format graphs validated by trugs_tools.validator.
+and emits TRUGS-format graphs validated by trugs_tools.validator.
 
 Output structure follows TRUGS_RESEARCH/CRAWLER/graph_builder.py:
   {
@@ -36,13 +36,13 @@ if TYPE_CHECKING:
 
 
 # ============================================================================
-# TRUGS 1.0 Graph Builder
+# TRUGS Graph Builder
 # ============================================================================
 
 
 class TRUGSWebGraphBuilder:
     """
-    Builds a TRUGS 1.0 research graph from web sources.
+    Builds a TRUGS research graph from web sources.
 
     Usage (async):
         builder = TRUGSWebGraphBuilder(llm_provider="mock")
@@ -63,7 +63,7 @@ class TRUGSWebGraphBuilder:
             },
             "capabilities": {
                 "extensions": [],
-                "vocabularies": ["research_v1"],
+                "vocabularies": ["research_v1", "core_v2.0.0"],
                 "profiles": [],
             },
             "nodes": [],
@@ -367,7 +367,7 @@ async def build_graph(
     validate: bool = True,
 ) -> TRUGSWebGraphBuilder:
     """
-    Build a TRUGS 1.0 research graph from web sources.
+    Build a TRUGS research graph from web sources.
 
     Args:
         topic: Research topic
@@ -379,7 +379,7 @@ async def build_graph(
         validate: Whether to validate before saving
 
     Returns:
-        TRUGSWebGraphBuilder with the completed TRUGS 1.0 graph
+        TRUGSWebGraphBuilder with the completed TRUGS graph
     """
     pipeline = _WebPipeline(
         llm_provider=llm_provider,
@@ -395,7 +395,7 @@ async def build_graph(
 
 
 def load_graph(filepath: str) -> dict:
-    """Load a TRUGS 1.0 graph from a .trug.json file."""
+    """Load a TRUGS graph from a .trug.json file."""
     path = Path(filepath)
     return json.loads(path.read_text())
 

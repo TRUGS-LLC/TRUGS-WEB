@@ -1,11 +1,11 @@
 """
 Graph Loader Module
 
-Loads TRUGS 1.0-format graphs and provides a query interface.
+Loads TRUGS-format graphs and provides a query interface.
 
-TRUGS 1.0 node fields: id, type, properties, metric_level, parent_id,
+TRUGS node fields: id, type, properties, metric_level, parent_id,
                         contains, dimension
-TRUGS 1.0 edge fields: from_id, to_id, relation, weight
+TRUGS edge fields: from_id, to_id, relation, weight
 """
 
 import json
@@ -16,7 +16,7 @@ from typing import Optional
 
 @dataclass
 class Node:
-    """A graph node (TRUGS 1.0 format)."""
+    """A graph node (TRUGS format)."""
 
     id: str
     type: str
@@ -60,7 +60,7 @@ class Node:
 
 @dataclass
 class Edge:
-    """A graph edge (TRUGS 1.0 format)."""
+    """A graph edge (TRUGS format)."""
 
     from_id: str
     to_id: str
@@ -356,7 +356,7 @@ class Graph:
 
 class GraphLoader:
     """
-    Loads TRUGS 1.0-format graphs from files or dicts.
+    Loads TRUGS-format graphs from files or dicts.
 
     Accepts output from ``TRUGSWebGraphBuilder.to_dict()`` directly.
     """
@@ -375,7 +375,7 @@ class GraphLoader:
         return self._parse(data)
 
     def _parse(self, data):
-        """Parse TRUGS 1.0 graph data into a Graph object."""
+        """Parse TRUGS graph data into a Graph object."""
         # Extract topic from first dimension (if present)
         dimensions = data.get("dimensions") or {}
         dim_keys = list(dimensions.keys())
@@ -391,7 +391,7 @@ class GraphLoader:
             edge_count=len(data.get("edges", [])),
         )
 
-        # Parse nodes (TRUGS 1.0: properties, metric_level)
+        # Parse nodes (TRUGS: properties, metric_level)
         nodes = []
         for node_data in data.get("nodes", []):
             nodes.append(
@@ -403,7 +403,7 @@ class GraphLoader:
                 )
             )
 
-        # Parse edges (TRUGS 1.0: from_id, to_id, relation, weight)
+        # Parse edges (TRUGS: from_id, to_id, relation, weight)
         edges = []
         for edge_data in data.get("edges", []):
             edges.append(
@@ -420,7 +420,7 @@ class GraphLoader:
 
 def load_graph(path):
     """
-    Load a TRUGS 1.0 graph from a file path or dict.
+    Load a TRUGS graph from a file path or dict.
 
     Args:
         path: File path (str or Path) or a pre-parsed dict.

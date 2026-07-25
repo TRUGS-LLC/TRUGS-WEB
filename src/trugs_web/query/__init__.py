@@ -2,11 +2,11 @@
 TRUGS Web Query Sub-package
 
 Provides graph loading, traversal, and report synthesis for
-TRUGS 1.0 research graphs produced by TRUGSWebGraphBuilder.
+TRUGS research graphs produced by TRUGSWebGraphBuilder.
 
 Usage::
 
-    from trugs_tools.web.query import GraphLoader, GraphTraverser, ReportSynthesizer
+    from trugs_web.query import GraphLoader, GraphTraverser, ReportSynthesizer
 
     graph = GraphLoader().load(path)
     traverser = GraphTraverser(graph)

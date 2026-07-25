@@ -4,7 +4,7 @@ Report Synthesis Module
 Generates Markdown reports from graph traversal results.
 Optionally uses LLMs for richer insights.
 
-LLMClient and MockLLMClient are reused from trugs_tools.web.extractor.
+LLMClient and MockLLMClient are reused from trugs_web.extractor.
 """
 
 from dataclasses import dataclass, field
@@ -200,7 +200,7 @@ class ReportSynthesizer:
     Modes:
 
     * **Basic** – no LLM, structured findings only.
-    * **Enhanced** – uses ``LLMClient`` from ``trugs_tools.web.extractor``
+    * **Enhanced** – uses ``LLMClient`` from ``trugs_web.extractor``
       for richer synthesis.
     """
 
