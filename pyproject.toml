@@ -72,6 +72,18 @@ markers = [
     "graph_validation_e2e: end-to-end TRUG build + validate_trug() check (SP2)",
 ]
 
+[tool.ruff.lint]
+# Pin the rule selection explicitly rather than inheriting ruff's default.
+# CI installs ruff unpinned (`pip install ruff`), and ruff broadened its DEFAULT
+# selection after this repo's last green run — which turned the tree red without a
+# line of code changing (75 errors on main, I001/UP/SIM/DTZ/RUF). This is the set the
+# code was actually written against, and stating it means the next ruff release
+# cannot silently redefine what "lint passes" means here.
+#
+# Adopting the broader set is a fine idea, but it is a code change (~15 findings need
+# manual work, including timezone-naive datetime usage) and belongs in its own PR.
+select = ["E4", "E7", "E9", "F"]
+
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["E402"]   # tests may import after module-level setup
 
