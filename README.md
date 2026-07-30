@@ -6,7 +6,7 @@
 
 `trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. This boundary is licensed: the reserved patent (US 19/575,491) protects self-modifying graph substrates. A downstream user who wires this tool's passive output into a self-modifying agent operates outside this grant.
 
-As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depends downward on the T1 commons: `trugs-tools>=2.0.0` (language, validator) and `trugs-store>=2.0.0` (graph persistence). v1 ships the ingestion pipeline (crawler, extractor, resolver, credibility scorer, graph builder), query subsystem (loader, traverse, synthesize), and weight computation (topology-based importance ranking). Hub federation and refresh are deferred to Phase 2 (see `deferred_phase2/`).
+As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depends downward on the T1 commons: `trugs-tools>=2.0.0,<3.0.0` (language, validator) and `trugs-store>=2.0.0,<3.0.0` (graph persistence). v1 ships the ingestion pipeline (crawler, extractor, resolver, credibility scorer, graph builder), query subsystem (loader, traverse, synthesize), and weight computation (topology-based importance ranking). Hub federation and refresh are deferred to Phase 2 (see `deferred_phase2/`).
 
 ## Key Features
 
@@ -24,7 +24,7 @@ As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depen
 
 ```python
 import asyncio
-from trugs_web import build_graph, load_graph, query_graph, generate_report
+from trugs_web import build_graph, load_query_graph, query_graph, generate_report
 
 # 1. Build a passive graph from seed URLs (mock LLM provider for testing)
 async def main():
@@ -36,8 +36,9 @@ async def main():
     )
     print(f"Built: {len(builder.graph['nodes'])} nodes, {len(builder.graph['edges'])} edges")
 
-    # 2. Load and query the graph
-    graph = load_graph("acupuncture.trug.json")
+    # 2. Load and query the graph (load_query_graph returns the queryable Graph object;
+    #    the plain-dict load_graph is for direct JSON access, not for query_graph)
+    graph = load_query_graph("acupuncture.trug.json")
     results = query_graph(graph, "sources for acupuncture efficacy", min_weight=0.5)
     print(results)
 
@@ -125,19 +126,21 @@ Every verb documents examples and options: `trugs-web <verb> --help`.
 ## Library Use
 
 ```python
-from trugs_web import build_graph, load_graph, query_graph, generate_report
+from trugs_web import build_graph, load_query_graph, query_graph, generate_report
 
 # build_graph (async) crawls the seed URLs over the live web and writes a passive graph:
 #   builder = await build_graph(topic="...", seed_urls=[...], llm_provider="mock",
 #                               output_path="out.trug.json")
 
-# load_graph / query_graph operate OFFLINE on an existing graph:
-graph = load_graph("example.trug.json")          # the shipped fixture
+# load_query_graph / query_graph operate OFFLINE on an existing graph:
+graph = load_query_graph("example.trug.json")    # the shipped fixture
 results = query_graph(graph, "GraphRAG", min_weight=0.5)
 print(results)
 
 # generate_report (async) renders a markdown report; it is also the `trugs-web synthesize` CLI verb.
 ```
+
+`load_graph` (also exported) returns the raw JSON dict; `query_graph` and `generate_report` take the `Graph` object returned by `load_query_graph`.
 
 Graph validation uses `trugs_tools.validator` internally — `TRUGSWebGraphBuilder.save(..., validate=True)` writes and validates in one step.
 
@@ -149,7 +152,7 @@ Graph validation uses `trugs_tools.validator` internally — `TRUGSWebGraphBuild
 
 ## Status
 
-**Beta.** v1 implements the Phase 1 ingestion and query pipeline. Hub federation, refresh, and self-developing loop reservation are deferred to Phase 2. Test coverage: 270 passing (respx-mocked HTTP, MockLLMClient). Pytest markers: `robots`, `rate_limit`, `cost`, `secret`, `logging`, `graph_validation_e2e`.
+**Active — the canonical home of `trugs-web`, where the package is developed and released.** Current version `2.0.0`; maturity **Beta**. v1 implements the Phase 1 ingestion and query pipeline. Hub federation, refresh, and self-developing loop reservation are deferred to Phase 2. Test coverage: 273 passing (respx-mocked HTTP, MockLLMClient). Pytest markers: `robots`, `rate_limit`, `cost`, `secret`, `logging`, `graph_validation_e2e`.
 
 ## License
 
