@@ -4,7 +4,7 @@
 
 ## What & Why
 
-`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. A downstream user who wires this tool's passive output into a self-modifying agent operates outside this grant.
+`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. See [Scope](#scope) for what this software includes.
 
 As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depends downward on the T1 commons: `trugs-tools>=2.0.0,<3.0.0` (language, validator) and `trugs-store>=2.0.0,<3.0.0` (graph persistence). v1 ships the ingestion pipeline (crawler, extractor, resolver, credibility scorer, graph builder), query subsystem (loader, traverse, synthesize), and weight computation (topology-based importance ranking). Hub federation and refresh are deferred to Phase 2 (see `deferred_phase2/`).
 
@@ -16,7 +16,7 @@ As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depen
 - **Credibility scoring**: topology-aware confidence weights on nodes and edges
 - **TRUGS graph output**: validated against `trugs_tools.validator.validate_trug`; query-ready JSON
 - **Query & traverse**: load a graph, traverse by relation type, filter by weight threshold, synthesize findings into markdown reports
-- **Safety rails**: secrets from environment (never inline), LLM cost guard, inter-request delays, structured logging
+- **Safety rails**: secrets from environment (never inline), structured logging, retry backoff, and a configurable delay while preparing a crawl batch; requests within that batch run in parallel without spacing. `CostGuard` is a standalone utility that callers must invoke themselves; crawl/build and extractors do not enforce its budget.
 
 ## Quick Example
 
@@ -163,7 +163,7 @@ own structure while they run.
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-This license covers a **one-way, passive** tool. See [NOTICE](NOTICE) for boundary and commercial licensing.
+See [Scope](#scope) for what this one-way, passive tool includes. [NOTICE](NOTICE) carries attribution only.
 
 ## Contributing
 

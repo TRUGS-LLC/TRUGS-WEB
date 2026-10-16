@@ -48,16 +48,16 @@ class LLMClient(Protocol):
 
 ### Available Implementations
 
-1. **MockLLMClient** (`extractor.py:101-126`)
+1. **MockLLMClient** (`extractor.py:101-148`)
    - No API key required; returns synthetic JSON based on prompt patterns.
    - Test fixture in `conftest.py`; enables full integration testing without network calls.
 
-2. **AnthropicClient** (`extractor.py:129-154`)
+2. **AnthropicClient** (`extractor.py:151-176`)
    - Uses `anthropic.AsyncAnthropic(api_key=...)` (Claude Haiku, cheap extraction).
    - API key: `$ANTHROPIC_API_KEY` environment variable (resolved via `_safety.resolve_api_key()`).
    - Model default: `claude-3-haiku-20240307`; override with `--model` flag.
 
-3. **OpenAIClient** (`extractor.py:157-182`)
+3. **OpenAIClient** (`extractor.py:179-204`)
    - Uses `openai.AsyncOpenAI(api_key=...)` (GPT-3.5, cheap extraction).
    - API key: `$OPENAI_API_KEY` environment variable.
    - Model default: `gpt-3.5-turbo`; override with `--model` flag.
@@ -67,13 +67,13 @@ class LLMClient(Protocol):
 | Module | Method | Protocol Check |
 |--------|--------|---|
 | `extractor.EntityExtractor` | `extract(source: Source)` | Uses `llm.complete()` to parse entities from content. |
-| `extractor.RelationExtractor` | `extract(sources: list[Source])` | Uses `llm.complete()` to infer relations between entities. |
-| `extractor.CitationExtractor` | `extract(sources: list[Source])` | Uses `llm.complete()` to extract bibliographic citations. |
-| `query.synthesize.ReportSynthesizer` | `synthesize(graph, query)` | Uses `llm.complete()` (or a non-LLM fallback) to render markdown reports — shipped in v1 as the `trugs-web synthesize` verb. |
+| `extractor.RelationExtractor` | `extract(source: Source, entities: list)` | Uses `llm.complete()` to infer relations between the supplied entities in one source. |
+| `extractor.CitationExtractor` | `extract(source: Source)` | Uses `llm.complete()` to extract bibliographic citations from one source. |
+| `query.synthesize.ReportSynthesizer` | `synthesize(graph, result: TraversalResult, title=None)` | Returns a `Report`; uses `llm.complete()` (or a non-LLM fallback) to render markdown reports — shipped in v1 as the `trugs-web synthesize` verb. |
 
 ## Safety Rails (Tier-B)
 
-All defined in `src/trugs_web/_safety.py`. Used by crawlers and extractors.
+Utilities are defined in `src/trugs_web/_safety.py`. Crawlers and extractors use selected utilities; `CostGuard` is standalone and is not wired into crawl/build or extraction. Callers must invoke it themselves before each LLM call to enforce a budget.
 
 ### 1. Secrets from Environment
 
@@ -113,7 +113,7 @@ delay = backoff_delay(attempt=2)  # 0.5 * 2^2 = 2.0 seconds
 # cap at 30.0 seconds
 ```
 
-**Test marker:** `@pytest.mark.rate_limit` (verify inter-request delays and backoff on transient failures).
+**Test marker:** `@pytest.mark.rate_limit` (verify delay calls during batch preparation and backoff on transient failures). `request_delay` sleeps while assembling allowed URLs, then the batch fetches run in parallel; it does not space those requests or enforce a per-domain rate.
 
 ### 4. robots.txt Politeness
 
@@ -137,7 +137,7 @@ The library **does not configure handlers** (that's the application's job); it e
 ## Running Tests
 
 ```bash
-# Full test suite (14 tests, 270+ assertions, all passing)
+# Full configured release test suite (excludes archived deferred_phase2/tests)
 pytest tests/
 
 # By marker (safe to run in CI without API keys, network, or costs)
@@ -260,4 +260,4 @@ grep -A 5 "def __init__.*llm" src/trugs_web/extractor.py
 ## Version
 
 - **trugs-web v2.0.0** (Beta, parity with trugs-folder / trugs-tools)
-- **License:** Apache-2.0 with patent NOTICE
+- **License:** Apache-2.0 with attribution-only NOTICE; see README [Scope](README.md#scope).

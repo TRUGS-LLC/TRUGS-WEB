@@ -2,7 +2,7 @@
 
 **TRUGS web research tool.** One binary, `trugs-web` — crawl web sources and build a passive TRUGS knowledge graph. Extract entities and relations (LLM-backed, model-agnostic), resolve deduplication, score credibility, and emit a read-only graph for querying.
 
-The tool is **one-way and passive**: it builds graphs for querying; it never closes the self-developing loop (the reserved patent mechanism, US app 19/575,491).
+The tool is **one-way and passive**: it builds graphs for querying; it never closes the self-developing loop. See README [Scope](README.md#scope).
 
 ## Install
 
@@ -31,7 +31,7 @@ trugs-web query graph.trug.json --q "sources for machine learning" --min-weight 
 trugs-web synthesize graph.trug.json --q "evidence for machine learning" --out report.md
 ```
 
-Every verb documents examples and exit codes: `trugs-web <verb> --help`.
+Every verb documents examples and options: `trugs-web <verb> --help`. Help does not document exit codes.
 
 ## Architecture
 
@@ -69,7 +69,7 @@ Source Discovery
 For a public tool that runs LLM-backed crawls against live sites and paid APIs:
 
 - **secrets**: API keys from environment (`$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY`), never required inline, never logged
-- **cost guard**: Pre-flight budget ceiling on LLM calls and token spend (no-op by default)
+- **cost guard**: Standalone `CostGuard` utility for callers to invoke before each LLM request; it is not wired into crawl/build or extractors and those paths do not enforce its budget
 - **rate limit**: Inter-request delay + exponential backoff on retryable HTTP status
 - **robots.txt**: Crawl politeness, cached per host, fail-open on parse errors
 - **logging**: Structured logger so failures are debuggable, not swallowed
@@ -145,7 +145,7 @@ These will ship in `2.1.0`.
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-The patent NOTICE covers the one-way, passive nature of this tool. Self-modifying graph systems that close the development loop are reserved under US patent application 19/575,491 (EGS-979). See https://github.com/Xepayac/XEPAYAC_LLC for AGPL 3.0 and commercial licensing.
+NOTICE carries attribution only. See README [Scope](README.md#scope) for what this software includes.
 
 ## Lineage
 
@@ -181,6 +181,7 @@ its own wheel with its own binary, `trugs-web`. The 1.0 → 2.0 module migration
 
 - The `trugs-web` binary: four ingestion+query verbs (`crawl` / `build` / `query` / `synthesize`), each with
   examples and documented exit codes in `--help`.
+  Correction, 2026-10-16: verb help includes options and examples, but does not document exit codes.
 - Installable Python package: `pip install trugs-web[web,llm]` (web = httpx, beautifulsoup4, lxml; llm = anthropic, openai).
 - Ingestion pipeline (AAA (private reference removed) SP1–SP3): source discovery, entity/relation/citation extraction (LLM-backed,
   model-agnostic via `LLMClient` protocol), entity resolution (deduplication), credibility scoring, TRUGS 1.0 graph
@@ -210,6 +211,10 @@ the tool (it never closes the self-developing loop, US app 19/575,491). Downstre
 passive output into self-modifying agents operate outside the Apache grant. See
 [NOTICE](NOTICE) and https://github.com/Xepayac/XEPAYAC_LLC for AGPL 3.0 and commercial licensing of the
 reserved mechanism.
+
+Correction, 2026-10-16: LICENSE is Apache-2.0 and NOTICE now carries attribution only. The former exclusion
+and commercial-licensing pointers above do not describe the current NOTICE. See README [Scope](README.md#scope)
+for what this software includes.
 
 ### Deferred to Phase 2
 

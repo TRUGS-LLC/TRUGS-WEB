@@ -4,7 +4,7 @@ Source Discovery Module
 Discovers sources for a given topic using web scraping and link extraction.
 Uses async HTTP (httpx + asyncio) — no LLM required for discovery.
 
-Requires: pip install trugs-tools[web]
+Requires: pip install trugs-web[web]
 """
 
 import asyncio
@@ -137,7 +137,7 @@ class SourceDiscoverer:
         except ImportError as exc:
             raise ImportError(
                 "httpx is required for web crawling. "
-                "Install with: pip install trugs-tools[web]"
+                "Install with: pip install trugs-web[web]"
             ) from exc
 
         sources: list = []
@@ -199,7 +199,7 @@ class SourceDiscoverer:
         except ImportError as exc:
             raise ImportError(
                 "beautifulsoup4 is required for web crawling. "
-                "Install with: pip install trugs-tools[web]"
+                "Install with: pip install trugs-web[web]"
             ) from exc
 
         try:
@@ -315,7 +315,8 @@ async def discover_sources(
     Args:
         seed_urls: Starting URLs
         topic: Research topic hint
-        max_sources: Maximum sources to discover
+        max_sources: Stop starting batches once this source count is reached;
+            the final batch can exceed it
 
     Returns:
         List of Source objects

@@ -6,7 +6,7 @@
 
 - **Type:** T2 reference application (sibling of `trugs-folder`)
 - **Dependencies:** T1 commons (`trugs-tools>=2.0.0`, `trugs-store>=2.0.0`)
-- **License:** Apache-2.0 + PATENT NOTICE
+- **License:** Apache-2.0 with attribution-only NOTICE; see README [Scope](README.md#scope).
 - **v1 scope:** Ingestion (crawler → extractor → resolver → credibility → graph_builder), query, weight. Hub federation and refresh deferred to Phase 2.
 
 ---
@@ -39,7 +39,7 @@ QUERY (loader, traverse, synthesize)
    TraversalResult | Report (markdown)
 ```
 
-**Flow guarantee:** Each stage outputs immutable, serializable data. No mutation, no state sharing between stages. Graph always passes `validate_trug()` before save.
+**Stage data:** `Source`, `Entity`, and `ResolvedEntity` are mutable dataclasses. Stages can share collection references, including aliases and metadata; later mutations can affect builder data. Saving validates by default; `save(validate=False)` bypasses validation, as does `build_graph(..., output_path=..., validate=False)`.
 
 ---
 
@@ -52,17 +52,17 @@ QUERY (loader, traverse, synthesize)
 | Class / Function | Role |
 |---|---|
 | `Source` | Dataclass: `{url, title, description, source_type, content, outbound_links, metadata}`. Properties: `.domain`, `.is_academic`, `.is_github`. |
-| `SourceDiscoverer` | Async crawler. Tier-B safety (see below): respects `robots.txt` (fail-open), inter-request delay, exponential backoff on 429/5xx. Constructor opt-in: `request_delay=0.0`, `respect_robots=True`, `max_retries=2`. |
-| `discover_sources()` | Convenience entry point: `async discover_sources(seed_urls, topic="", max_sources=50, max_depth=2) → Source[]`. |
+| `SourceDiscoverer` | Async crawler. Tier-B safety (see below): respects `robots.txt` (fail-open), delays during batch preparation, exponential backoff on 429/5xx. Constructor opt-in: `request_delay=0.0`, `respect_robots=True`, `max_retries=2`. Batch requests run in parallel without spacing. |
+| `discover_sources()` | Convenience entry point: `async discover_sources(seed_urls, topic='', max_sources=50) → Source[]`. Configure `max_depth` on `SourceDiscoverer` instead. |
 
 **Key APIs:**
-- `SourceDiscoverer.fetch_url()` — HTTP GET with backoff + robots.txt check.
-- `SourceDiscoverer.extract_links()` — Parse HTML, yield relative/absolute links.
-- `SourceDiscoverer.discover()` — BFS from seeds, yield `Source` objects.
+- `SourceDiscoverer._fetch_source(client, url, depth)` — Internal HTTP GET with retry backoff; returns a `Source` or `None`.
+- `SourceDiscoverer._extract_links(soup, base_url)` — Internal HTML link parser; returns normalized HTTP(S) URLs.
+- `await SourceDiscoverer.discover(seed_urls, topic="")` — BFS from seeds; checks robots.txt before fetching and returns a list of `Source` objects.
 
 **Safety rails (Tier-B):**
-- `robots.txt` politeness: HEAD to `/robots.txt`, parse `User-agent: TRUGSWebCrawler`, respect `Disallow`. Fail-open: if fetch fails, crawl anyway (log warning).
-- Inter-request delay: configurable `request_delay` (e.g., 1.0 sec) per domain.
+- `robots.txt` politeness: GET `/robots.txt`, respect `Disallow` for the configured user agent. Fail-open: network exceptions log at DEBUG; non-200 responses silently allow crawling.
+- Batch preparation delay: configurable `request_delay` sleeps for each allowed URL before the batch fetches begin. Parallel requests in the batch are not spaced, and there is no per-domain limiter.
 - Exponential backoff: on 429/500/502/503/504, wait `base * 2^attempt` (capped 30s).
 - Logging: structured via `_safety.get_logger()`.
 
@@ -78,8 +78,8 @@ QUERY (loader, traverse, synthesize)
 | `Relation` | Dataclass: `{from_id, to_id, relation_type, evidence, confidence, source_url}`. Method: `.to_edge()` → TRUGS edge. |
 | `LLMClient` (Protocol) | Interface: `async complete(prompt: str, max_tokens: int) → str`. Implemented by: `MockLLMClient`, `AnthropicClient`, `OpenAIClient`. |
 | `EntityExtractor` | Async: `await extractor.extract(source: Source) → Entity[]`. Sends LLM prompt, parses JSON response. |
-| `RelationExtractor` | Async: `await extractor.extract(source: Source) → Relation[]`. |
-| `CitationExtractor` | Async: finds papers/references in text. |
+| `RelationExtractor` | Async: `await extractor.extract(source: Source, entities: list) → Relation[]`. Requires the known entities for that source. |
+| `CitationExtractor` | Async: `await extractor.extract(source: Source) → list`. Returns citation dictionaries found in one source. |
 | `create_extractor(provider, api_key=None, model=None)` | Factory: reads `$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY` (via `_safety.resolve_api_key()`). Returns `(EntityExtractor, RelationExtractor)`. |
 
 **LLM Clients:**
@@ -89,7 +89,7 @@ QUERY (loader, traverse, synthesize)
 
 **Safety rails:**
 - API key from environment **only** (never inline): `resolve_api_key()` checks `$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY`.
-- LLM cost guard (see below).
+- `CostGuard` is a standalone utility (see below); extraction and crawl/build do not invoke it or enforce its budget.
 - Structured error logging on extraction failure.
 
 ---
@@ -124,13 +124,16 @@ QUERY (loader, traverse, synthesize)
 | Class / Function | Role |
 |---|---|
 | `CredibilityFactors` | Dataclass: `{peer_reviewed, author_credentials, citation_score, venue_quality, recency}`. Each factor ≤ their max; `.total` property sums and **caps at 0.95** (perfect score never auto-assigned). |
-| `CredibilityScorer` | `score(source: Source) → CredibilityFactors`. Checks domain (arxiv, nature, ieee, openai.com, etc. → +0.15–0.20). Authors (e.g., `creator` meta tag → +0.2). Publication date (recent → +0.1). Aggregates signals, respects 0.95 cap. |
+| `CredibilityScorer` | `score_source(source: Source) → CredibilityFactors`. Uses source type, domain, `metadata["author"]["h_index"]` or `metadata["stars"]`, citations and publication date. These are initial credibility signals; topology ranking is a separate query-time API. |
 | `calculate_credibility(source) → float` | Shorthand: score and return `.total`. |
-| `score_edge_weight(relation, source_credibility) → float` | Combines relation confidence + source credibility; returns 0.0–1.0. |
+| `score_edge_weight(relation, source=None) → float` | Uses source credibility when a `Source` is supplied, otherwise relation confidence; applies a relation-type multiplier and caps at the scorer's ceiling. |
 
 **Domain ranking (sample):**
 - High: nature.com, science.org, arxiv.org, ieee.org, acm.org (0.15–0.20)
-- Medium: openai.com, anthropic.com, pytorch.org, reactjs.org (0.10–0.12)
+- openai.com: 0.12
+- anthropic.com: 0.12
+- pytorch.org: 0.15
+- reactjs.org: 0.15
 - Low: techcrunch.com, arstechnica.com, wired.com (0.08)
 
 ---
@@ -141,12 +144,12 @@ QUERY (loader, traverse, synthesize)
 
 | Class / Function | Role |
 |---|---|
-| `TRUGSWebGraphBuilder` | Stateful builder. Constructor: `__init__(name: str, topic: str, description: str)`. Creates root `RESEARCH_GRAPH` node. Methods: `.add_source_node(source, credibility)`, `.add_entity(entity)`, `.add_relation(from_id, to_id, relation, weight)`, `.validate()`, `.save(filepath, validate=True)`. Returns graph conforming to TRUGS schema. |
+| `TRUGSWebGraphBuilder` | Stateful builder. Constructor: `__init__(name: str, topic: str, description: str = "")`. Creates root `RESEARCH_GRAPH` node. Methods: `.add_source_node(source, credibility)`, `.add_entity_node(entity: ResolvedEntity)`, `.add_relation_edge(relation: Relation, weight)`, `.validate()`, `.save(filepath, validate=True)`. Mutable graph data is available as `.graph`. |
 | `_WebPipeline` (internal) | Orchestrates crawl → extract → resolve → score → graph. Runs async: `await pipeline.run(topic, seed_urls) → TRUGSWebGraphBuilder`. |
-| `build_graph(topic, seed_urls, provider, ...)` | High-level async entry: `await build_graph(...) → dict` (the graph). Calls `_WebPipeline`, validates, returns. |
+| `build_graph(topic, seed_urls, llm_provider="mock", api_key=None, model=None, output_path=None, validate=True)` | High-level async entry returning `TRUGSWebGraphBuilder`. Validates only when saving to `output_path` with `validate=True`; no validation is run without an output path or with the bypass selected. |
 | `load_graph(filepath: str) → dict` | Deserialize `.trug.json`. |
-| `url_to_id(url) → str` | Hash URL to safe ID. |
-| `make_id(text) → str` | Slugify text to safe ID (lowercase, alphanumeric + underscore). |
+| `url_to_id(url) → str` | Normalizes and truncates the URL's host/path to a lowercase, hyphenated ID; does not hash. |
+| `make_id(text) → str` | Truncates a lowercase text slug: removes punctuation and replaces whitespace with hyphens. |
 
 **Graph structure (TRUGS envelope):**
 ```json
@@ -180,7 +183,7 @@ QUERY (loader, traverse, synthesize)
 }
 ```
 
-**Validation:** `TRUGSWebGraphBuilder.validate()` invokes `trugs_tools.validator.validate_trug(graph)` and returns a `ValidationResult`. All saved graphs **must** pass validation (else `.save()` raises `ValueError`).
+**Validation:** `TRUGSWebGraphBuilder.validate()` invokes `trugs_tools.validator.validate_trug(graph)` and returns a `ValidationResult`. `.save(validate=True)` validates before writing and raises `ValueError` on failure; `.save(validate=False)` writes without validation.
 
 ---
 
@@ -191,7 +194,7 @@ QUERY (loader, traverse, synthesize)
 |---|---|
 | `Node` | Dataclass: `{id, type, properties, metric_level}`. Properties include: `name`, `description`, `credibility`, `url`. Method: `.matches(**criteria)` for filtering. |
 | `Edge` | Dataclass: `{from_id, to_id, relation, weight}`. |
-| `Graph` | Wrapper: `{meta, nodes_dict, edges_list}`. Methods: `.search_nodes(query)`, `.neighbors(node_id)`. |
+| `Graph` | Wrapper: `{meta, nodes_dict, edges_list}`. Methods: `.search_nodes(query)`, `.get_neighbors(node_id, direction="both", min_weight=0.0)`. |
 | `GraphLoader` | `load(filepath_or_dict) → Graph`. Deserializes `.trug.json`, builds node/edge indexes. |
 
 #### Traverse (`traverse.py`)
@@ -204,10 +207,10 @@ QUERY (loader, traverse, synthesize)
 #### Synthesize (`synthesize.py`)
 | Class | Role |
 |---|---|
-| `Finding` | Result element: `{node, edges, confidence}`. |
-| `Report` | Markdown: `{title, summary, findings[], sources}`. |
-| `ReportSynthesizer` | `synthesize(traversal_result) → Report`. Converts graph traversal to human-readable markdown with citations. |
-| `generate_report(graph, q, ...)` | Shorthand: query, synthesize, return markdown `str`. |
+| `Finding` | Result element: `{statement, source_name, source_url, weight, evidence}`. |
+| `Report` | Fields: `{title, query, graph_id, generated, summary, findings[], contradictions[], recommendations[], source_count, high_credibility_count, avg_weight}`. `.to_markdown()` renders the report. |
+| `ReportSynthesizer` | `await synthesize(graph, result: TraversalResult, title=None) → Report`. Converts graph traversal to a report with citations. |
+| `generate_report(graph, query, ...)` | Async shorthand: query, synthesize, return `Report`; call `.to_markdown()` for markdown text. |
 
 ---
 
@@ -218,9 +221,9 @@ QUERY (loader, traverse, synthesize)
 |---|---|
 | `NodeTopology` | Dataclass: `{node_id, inbound_count, weighted_inbound, sources}`. Computed per node across loaded TRUGs at query time (never stored). |
 | `compute_topology(graphs[]) → dict` | `{node_id: NodeTopology}`. Counts inbound edges + sums weights across all graphs. |
-| `rank_by_importance(topology_dict, top_n=10)` | Sort nodes by inbound edge count (importance). Returns top N. |
-| `find_convergence(graphs[]) → Node[]` | Find nodes with edges from ≥3 graphs (strong consensus). |
-| `compute_freshness(graph, days=365) → dict` | Age of nodes by publication date. Returns `{node_id: age_days}`. |
+| `rank_by_importance(topology_dict, min_inbound=1) → NodeTopology[]` | Returns all eligible nodes sorted by descending `weighted_inbound`. |
+| `find_convergence(topology_dict, min_sources=2) → NodeTopology[]` | Filters by distinct contributing graph names/IDs; sorts by source count, then weighted inbound, descending. |
+| `compute_freshness(edge, now=None, half_life_days=30.0) → float` | Exponential decay of an edge timestamp; returns a freshness score, with missing/unparseable timestamps receiving the minimum. |
 
 **Design principle:** All computations are **read-time** and never mutate input graphs. No new state stored.
 
@@ -242,11 +245,11 @@ Tier-B safety is **opt-in via constructor parameters** so default construction i
 ### Rate Limit & Backoff (`_safety.py` + `crawler.py`)
 - **Constant:** `RETRYABLE_STATUS = {429, 500, 502, 503, 504}`.
 - **backoff_delay(attempt, base=0.5, cap=30.0):** Exponential: `min(cap, base * 2^attempt)`.
-- **SourceDiscoverer:** Constructor params `request_delay=0.0`, `max_retries=2`. Applied per domain.
+- **SourceDiscoverer:** Constructor params `request_delay=0.0`, `max_retries=2`. Delay calls occur while preparing allowed URLs, before parallel fetches start. Requests in a batch are not spaced; no per-domain limiter is implemented. Retry backoff applies to each fetch separately.
 
 ### Robots.txt Politeness (`crawler.py`)
 - **SourceDiscoverer(respect_robots=True):** Checks `/robots.txt` before crawling. Respects `Disallow:` rules for `User-agent: TRUGSWebCrawler`.
-- **Fail-open:** If robots.txt fetch fails, crawl anyway (log warning).
+- **Fail-open:** Network exceptions log at DEBUG and allow crawling; non-200 responses silently allow crawling.
 - **No enforcement:** Malicious use is possible; tool assumes good faith.
 
 ### Structured Logging (`_safety.py`)
@@ -284,7 +287,7 @@ include = ["trugs_web*"]  # deferred_phase2/ NOT included
 
 ## Emitted TRUG Envelope
 
-Every graph emitted by `TRUGSWebGraphBuilder.save()` conforms to **TRUGS schema** and passes `trugs_tools.validator.validate_trug()`:
+With the default `validate=True`, `TRUGSWebGraphBuilder.save()` checks the graph with `trugs_tools.validator.validate_trug()` before writing. `validate=False` bypasses that check and can emit invalid graphs. The normal envelope is:
 
 ```python
 {
@@ -376,12 +379,19 @@ trugs-web synthesize <graph.trug.json> --q '<query>' [--out <path>]
 
 **Example test:**
 ```python
+import pytest
+from trugs_web.crawler import Source
+from trugs_web.graph_builder import TRUGSWebGraphBuilder
+
 @pytest.mark.graph_validation_e2e
 def test_builder_validate_invokes_validator_and_passes(monkeypatch):
     import trugs_tools.validator as v
     calls = []
     real = v.validate_trug
-    monkeypatch.setattr(v, "validate_trug", spy=lambda g, *a, **kw: (calls.append(g), real(g, *a, **kw)))
+    def spy(graph, *args, **kwargs):
+        calls.append(graph)
+        return real(graph, *args, **kwargs)
+    monkeypatch.setattr(v, "validate_trug", spy)
     builder = TRUGSWebGraphBuilder(name="e2e", topic="testing")
     builder.add_source_node(Source(url="https://example.com/a", source_type="WEB_SOURCE"), credibility=0.7)
     result = builder.validate()
@@ -409,12 +419,11 @@ pip install "trugs-web[test]"     # pytest, respx, pytest-asyncio (testing)
 
 ---
 
-## License & Patent Notice
+## License & Scope
 
 **License:** Apache-2.0 (`LICENSE` file).
 
-**PATENT NOTICE** (NOTICE file):
-> This license covers a ONE-WAY, PASSIVE tool. It does NOT cover self-developing graph systems (agent-in-the-loop mutation, no compile boundary).
+**NOTICE:** Attribution only. See README [Scope](README.md#scope) for what this software includes.
 
 ---
 
@@ -423,7 +432,7 @@ pip install "trugs-web[test]"     # pytest, respx, pytest-asyncio (testing)
 1. **One-way passive:** Crawl web sources → extract → resolve → score → emit graph. No write-back, no mutation loop.
 2. **T2-on-T1:** Depends downward on `trugs-tools` (T1 language) + `trugs-store` (T1 store). Never upward on T3 (application).
 3. **Model-agnostic LLM:** Extractor works with Anthropic, OpenAI, or mock. Pluggable via `LLMClient` protocol.
-4. **Validation invariant (INVARIANT-2):** Every graph emitted to disk passes `trugs_tools.validator.validate_trug()`. Enforced in `.save(validate=True)`.
-5. **Immutable stage output:** Crawler → Source[], Extractor → Entity[], Resolver → ResolvedEntity[], etc. No aliasing, no in-place mutation.
+4. **Default save validation (INVARIANT-2):** `.save(validate=True)` validates before writing. `.save(validate=False)` bypasses validation; `build_graph` forwards this option only when saving to an output path.
+5. **Mutable stage output:** Crawler → Source[], Extractor → Entity[], Resolver → ResolvedEntity[], etc. Dataclasses and their collections are mutable; aliases and other references can be shared with builder data.
 6. **Read-time weight:** Node importance and freshness computed at query time, never stored in the graph.
 7. **Safety opt-in:** Tier-B rails (robots.txt, cost guard, rate limit, secrets) all constructor-configurable. Default = unchanged behavior.

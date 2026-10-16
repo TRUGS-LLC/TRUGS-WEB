@@ -55,7 +55,7 @@ Changelog = "https://github.com/TRUGS-LLC/TRUGS-WEB/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-license-files = ["LICENSE", "NOTICE"]   # dists carry the Apache license + patent NOTICE
+license-files = ["LICENSE", "NOTICE"]   # dists carry the Apache license + attribution NOTICE
 
 [tool.setuptools.packages.find]
 where = ["src"]

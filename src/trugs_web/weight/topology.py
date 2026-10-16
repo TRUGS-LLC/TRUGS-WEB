@@ -1,7 +1,7 @@
 """
 Weight Topology — query-time node importance across loaded TRUGs.
 
-From TRUGS_WEB/AAA.md §8:
+See ARCHITECTURE.md, Weight Subsystem:
 
     *"Node importance is computed at query time from inbound edge
     counts across loaded TRUGs — not stored."*
