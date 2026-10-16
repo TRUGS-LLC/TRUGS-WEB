@@ -42,8 +42,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_crawl.add_argument("seed_urls", nargs="+", help="seed URL(s) to crawl")
     p_crawl.add_argument("--topic", default="", help="topic hint")
     p_crawl.add_argument(
-        "--max-sources", type=int, default=20,
-        help="source-count threshold checked before each batch; final batch may exceed it"
+        "--max-sources",
+        type=int,
+        default=20,
+        help="source-count threshold checked before each batch; final batch may exceed it",
     )
 
     p_build = sub.add_parser(

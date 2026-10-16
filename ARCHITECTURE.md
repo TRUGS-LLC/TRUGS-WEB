@@ -88,7 +88,7 @@ QUERY (loader, traverse, synthesize)
 - **OpenAIClient:** Wraps `openai.AsyncOpenAI(api_key)`. Default model: `gpt-3.5-turbo`.
 
 **Safety rails:**
-- API key from environment **only** (never inline): `resolve_api_key()` checks `$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY`.
+- API keys need not be hard-coded: `resolve_api_key()` uses an explicit argument when supplied, otherwise checks `$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY`.
 - `CostGuard` is a standalone utility (see below); extraction and crawl/build do not invoke it or enforce its budget.
 - Structured error logging on extraction failure.
 
@@ -102,7 +102,7 @@ QUERY (loader, traverse, synthesize)
 |---|---|
 | `ResolvedEntity` | Dataclass: `{id, canonical_name, entity_type, description, aliases[], source_urls[], mention_count, metadata}`. Merged view of an entity. Method: `.to_node()` → TRUGS node. |
 | `EntityResolver` | `resolve(entities: Entity[]) → ResolvedEntity[]`. Uses string similarity (≥0.85 by default) + known alias dict (e.g., `"langchain"` ↔ `"lang chain"`). Groups duplicates, picks canonical. |
-| `CrossReferenceMapper` | Builds bidirectional mapping: `entity_id ↔ canonical_id`. Enables relation rewriting post-merge. |
+| `CrossReferenceMapper` | Maps source URLs to entity IDs and entity IDs to source URLs; finds cross-reference records and sources connected through shared entities. Provides no canonical-ID mapping or relation rewrite API. |
 
 **Known aliases (built-in):**
 ```python
@@ -231,11 +231,11 @@ QUERY (loader, traverse, synthesize)
 
 ## Safety Rails (Tier-B)
 
-Tier-B safety is **opt-in via constructor parameters** so default construction is unchanged. All implemented in `src/trugs_web/_safety.py` and `crawler.py`.
+Tier-B safety uses utilities in `src/trugs_web/_safety.py` and crawler configuration in `crawler.py`. Robots checks are enabled by default; batch preparation delay and retry backoff are constructor-configurable. Key resolution accepts explicit arguments or environment fallback. `CostGuard` is standalone and is not wired into crawl/build or extraction.
 
 ### Secrets (`_safety.py`)
 - **resolve_api_key(provider, explicit=None):** Reads `$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY`. Never logs or echoes keys. Explicit argument wins precedence.
-- **No inline keys:** All extractors created via `create_extractor()`, which calls `resolve_api_key()`.
+- **No hard-coded keys required:** `create_extractor()` calls `resolve_api_key()`; an explicit API-key argument takes precedence over the environment.
 
 ### Cost Guard (`_safety.py`)
 - **CostGuard(max_calls=None, max_tokens=None):** Budget ceiling. Call `.check(prompt, max_tokens)` **before** each LLM request. Raises `CostBudgetExceeded` if budget exceeded.
@@ -254,7 +254,7 @@ Tier-B safety is **opt-in via constructor parameters** so default construction i
 
 ### Structured Logging (`_safety.py`)
 - **get_logger(name="trugs_web"):** Returns configured `logging.Logger`. Library does not set handlers (app's job); emits records for debugging.
-- **Used by:** Crawler (robots.txt warnings, backoff), extractor (LLM errors), resolver, etc.
+- **Used by:** Crawler (robots.txt network exceptions at DEBUG, disallowed URLs, retry backoff), extractor (LLM errors), and CLI (command failures). Resolver does not use a logger.
 
 ---
 
@@ -327,7 +327,7 @@ With the default `validate=True`, `TRUGSWebGraphBuilder.save()` checks the graph
       "from_id": str,
       "to_id": str,
       "relation": str,            # CITES, DEFINES, USES, EXTENDS, CONTRADICTS, SUPPORTS, INTEGRATES, etc.
-      "weight": float             # 0.0–1.0 (credibility × confidence)
+      "weight": float             # source credibility when supplied, otherwise confidence; relation-type multiplier, capped at scorer ceiling
     }
   ]
 }
@@ -435,4 +435,4 @@ pip install "trugs-web[test]"     # pytest, respx, pytest-asyncio (testing)
 4. **Default save validation (INVARIANT-2):** `.save(validate=True)` validates before writing. `.save(validate=False)` bypasses validation; `build_graph` forwards this option only when saving to an output path.
 5. **Mutable stage output:** Crawler → Source[], Extractor → Entity[], Resolver → ResolvedEntity[], etc. Dataclasses and their collections are mutable; aliases and other references can be shared with builder data.
 6. **Read-time weight:** Node importance and freshness computed at query time, never stored in the graph.
-7. **Safety opt-in:** Tier-B rails (robots.txt, cost guard, rate limit, secrets) all constructor-configurable. Default = unchanged behavior.
+7. **Safety configuration:** Robots checks default to enabled; batch preparation delay and retry backoff are configurable. Explicit API-key arguments override environment fallback. `CostGuard` requires caller invocation and is not wired into crawl/build or extraction.

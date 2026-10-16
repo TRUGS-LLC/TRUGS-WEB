@@ -70,7 +70,7 @@ For a public tool that runs LLM-backed crawls against live sites and paid APIs:
 
 - **secrets**: API keys from environment (`$ANTHROPIC_API_KEY` / `$OPENAI_API_KEY`), never required inline, never logged
 - **cost guard**: Standalone `CostGuard` utility for callers to invoke before each LLM request; it is not wired into crawl/build or extractors and those paths do not enforce its budget
-- **rate limit**: Inter-request delay + exponential backoff on retryable HTTP status
+- **rate limit**: Configurable delay during batch preparation; requests within the batch run in parallel without spacing. Exponential backoff on retryable HTTP status
 - **robots.txt**: Crawl politeness, cached per host, fail-open on parse errors
 - **logging**: Structured logger so failures are debuggable, not swallowed
 
@@ -121,7 +121,7 @@ Relation types: `CITES`, `DEFINES`, `USES`, `EXTENDS`, `CONTRADICTS`, `SUPPORTS`
 
 ## Testing
 
-270 passing tests (pytest markers: `robots`, `rate_limit`, `cost`, `secret`, `logging`, `graph_validation_e2e`).
+273 passing tests (pytest markers: `robots`, `rate_limit`, `cost`, `secret`, `logging`, `graph_validation_e2e`).
 
 - **respx-mocked HTTP**: crawler and extractor tests use fake HTTP responses
 - **MockLLMClient**: extraction tests work without API keys

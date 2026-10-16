@@ -4,19 +4,19 @@
 
 ## What & Why
 
-`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. See [Scope](#scope) for what this software includes.
+`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from source signals and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. See [Scope](#scope) for what this software includes.
 
 As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depends downward on the T1 commons: `trugs-tools>=2.0.0,<3.0.0` (language, validator) and `trugs-store>=2.0.0,<3.0.0` (graph persistence). v1 ships the ingestion pipeline (crawler, extractor, resolver, credibility scorer, graph builder), query subsystem (loader, traverse, synthesize), and weight computation (topology-based importance ranking). Hub federation and refresh are deferred to Phase 2 (see `deferred_phase2/`).
 
 ## Key Features
 
-- **Source discovery**: crawl seed URLs, discover linked pages, respect `robots.txt`, apply rate limits and exponential backoff
+- **Source discovery**: crawl seed URLs, discover linked pages, respect `robots.txt`, delay during batch preparation and apply exponential retry backoff; requests in a batch run in parallel without spacing
 - **Entity & relation extraction**: LLM-backed NLP (model-agnostic; use Anthropic Claude, OpenAI GPT, or mock for testing)
-- **Cross-reference resolution**: deduplicate entities across sources by name, description, and context
-- **Credibility scoring**: topology-aware confidence weights on nodes and edges
+- **Cross-reference resolution**: deduplicate entities of the same type across sources using names, aliases, string similarity, and normalized names
+- **Credibility scoring**: initial weights from source signals and metadata; topology ranking is a separate query-time API
 - **TRUGS graph output**: validated against `trugs_tools.validator.validate_trug`; query-ready JSON
 - **Query & traverse**: load a graph, traverse by relation type, filter by weight threshold, synthesize findings into markdown reports
-- **Safety rails**: secrets from environment (never inline), structured logging, retry backoff, and a configurable delay while preparing a crawl batch; requests within that batch run in parallel without spacing. `CostGuard` is a standalone utility that callers must invoke themselves; crawl/build and extractors do not enforce its budget.
+- **Safety rails**: API keys from environment by default, with explicit library arguments taking precedence (hard-coded keys are not required), structured logging, retry backoff, and a configurable delay while preparing a crawl batch; requests within that batch run in parallel without spacing. `CostGuard` is a standalone utility that callers must invoke themselves; crawl/build and extractors do not enforce its budget.
 
 ## Quick Example
 
@@ -90,7 +90,7 @@ The `trugs-web` binary exposes four verbs:
 trugs-web crawl https://example.com/research --topic "acupuncture" --max-sources 30
 ```
 
-Outputs a list of discovered sources (title, URL, source type). No LLM calls.
+Outputs a list of discovered sources (source type and URL). No LLM calls.
 
 ### `build` — Crawl, extract, resolve, score → TRUGS graph
 
@@ -109,7 +109,7 @@ Full pipeline: discovers sources, extracts entities/relations via LLM, resolves 
 trugs-web query acupuncture.trug.json --q "sources for efficacy" --min-weight 0.6
 ```
 
-Traverses the graph, returns matching nodes and paths as JSON.
+Traverses the graph and prints a JSON-encoded string containing the traversal result's Python representation, rather than a structured JSON object of nodes and paths.
 
 ### `synthesize` — Render a markdown report from a graph
 

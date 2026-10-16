@@ -214,10 +214,10 @@ class GraphTraverser:
 
     def weighted_consensus(self, concept, min_sources=2, min_weight=0.5):
         """
-        Find concepts/claims supported by multiple credible sources.
+        Find matching concepts/claims with enough incoming edges above the weight threshold.
 
-        Returns nodes that have multiple incoming edges from
-        high-credibility sources.
+        Returns nodes with at least min_sources incoming edges meeting min_weight.
+        Counts edges; does not check source-node credibility or distinct sources.
         """
         concept_nodes = self.graph.search_nodes(concept)
 

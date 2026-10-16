@@ -157,9 +157,9 @@ pytest tests/ --cov=src/trugs_web --cov-report=term-missing
 | Marker | Test Harness | Cost / Network / Keys |
 |--------|---|---|
 | `@pytest.mark.robots` (SP4) | respx-mocked HTTP | None; robots.txt politeness check |
-| `@pytest.mark.rate_limit` (SP4) | respx-mocked HTTP + asyncio | None; inter-request delay + backoff |
+| `@pytest.mark.rate_limit` (SP4) | respx-mocked HTTP + asyncio | None; batch preparation delay + retry backoff; parallel requests are not spaced |
 | `@pytest.mark.cost` (SP4) | `CostGuard` unit tests | None; verify budget ceiling logic |
-| `@pytest.mark.secret` (SP4) | `resolve_api_key()` unit tests | None; verify keys from env only |
+| `@pytest.mark.secret` (SP4) | `resolve_api_key()` unit tests | None; verify environment fallback and explicit-argument precedence |
 | `@pytest.mark.logging` (SP4) | `get_logger()` unit tests | None; verify error context |
 | `@pytest.mark.graph_validation_e2e` (SP2) | `respx`-mocked HTTP + `trugs_tools.validator.validate_trug()` | None; end-to-end build + validation |
 

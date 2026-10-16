@@ -10,7 +10,7 @@ except ImportError:
     HAS_BS4 = False
 
 pytestmark = pytest.mark.skipif(
-    not HAS_BS4, reason="bs4 not installed — pip install trugs-tools[web]"
+    not HAS_BS4, reason="bs4 not installed — pip install trugs-web[web]"
 )
 
 from trugs_web.crawler import Source, SourceDiscoverer, discover_sources

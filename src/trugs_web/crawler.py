@@ -66,9 +66,9 @@ class SourceDiscoverer:
     Discovers sources starting from seed URLs.
 
     Uses async HTTP scraping (no LLM) to find and categorize sources. Tier-B safety rails
-    (AAA (private reference removed) SP4): robots.txt politeness (fail-open), an inter-request delay, and
-    exponential backoff on retryable HTTP status — all opt-in via the constructor so default
-    construction is unchanged.
+    (AAA (private reference removed) SP4): robots.txt politeness (fail-open, enabled by default),
+    configurable batch preparation delay, and retry backoff. Batch requests run in parallel
+    without spacing; the delay does not separate requests.
     """
 
     def __init__(
@@ -159,7 +159,7 @@ class SourceDiscoverer:
                 if not batch:
                     break
 
-                # Tier-B: robots.txt politeness + inter-request delay (both opt-in)
+                # Tier-B: robots checks (default on) + delay before parallel batch fetches
                 allowed = []
                 for url, depth in batch:
                     if self.respect_robots and not await self._can_fetch(client, url):
