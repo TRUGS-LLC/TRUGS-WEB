@@ -4,8 +4,8 @@ A public, LLM-backed network crawler that strangers run against live sites and p
 guard rails a local tool never does:
 
 - secrets        — API keys read from the environment, never required inline, never logged.
-- cost guard     — a budget ceiling on LLM calls/tokens so a crawl can't run up an unbounded bill.
-- rate limit     — inter-request delay + exponential backoff on retryable HTTP status.
+- cost guard     — a standalone budget utility; crawl/build and extractors do not invoke it.
+- rate limit     — batch preparation delay (parallel fetches are not spaced) + retry backoff.
 - logging        — a configured logger so failures are debuggable instead of silently swallowed.
 
 robots.txt politeness lives in crawler.py (it needs the async HTTP client); the other rails are

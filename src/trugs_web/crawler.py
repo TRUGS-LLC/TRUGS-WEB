@@ -4,7 +4,7 @@ Source Discovery Module
 Discovers sources for a given topic using web scraping and link extraction.
 Uses async HTTP (httpx + asyncio) — no LLM required for discovery.
 
-Requires: pip install trugs-tools[web]
+Requires: pip install trugs-web[web]
 """
 
 import asyncio
@@ -66,9 +66,9 @@ class SourceDiscoverer:
     Discovers sources starting from seed URLs.
 
     Uses async HTTP scraping (no LLM) to find and categorize sources. Tier-B safety rails
-    (AAA (private reference removed) SP4): robots.txt politeness (fail-open), an inter-request delay, and
-    exponential backoff on retryable HTTP status — all opt-in via the constructor so default
-    construction is unchanged.
+    (AAA (private reference removed) SP4): robots.txt politeness (fail-open, enabled by default),
+    configurable batch preparation delay, and retry backoff. Batch requests run in parallel
+    without spacing; the delay does not separate requests.
     """
 
     def __init__(
@@ -137,7 +137,7 @@ class SourceDiscoverer:
         except ImportError as exc:
             raise ImportError(
                 "httpx is required for web crawling. "
-                "Install with: pip install trugs-tools[web]"
+                "Install with: pip install trugs-web[web]"
             ) from exc
 
         sources: list = []
@@ -159,7 +159,7 @@ class SourceDiscoverer:
                 if not batch:
                     break
 
-                # Tier-B: robots.txt politeness + inter-request delay (both opt-in)
+                # Tier-B: robots checks (default on) + delay before parallel batch fetches
                 allowed = []
                 for url, depth in batch:
                     if self.respect_robots and not await self._can_fetch(client, url):
@@ -199,7 +199,7 @@ class SourceDiscoverer:
         except ImportError as exc:
             raise ImportError(
                 "beautifulsoup4 is required for web crawling. "
-                "Install with: pip install trugs-tools[web]"
+                "Install with: pip install trugs-web[web]"
             ) from exc
 
         try:
@@ -315,7 +315,8 @@ async def discover_sources(
     Args:
         seed_urls: Starting URLs
         topic: Research topic hint
-        max_sources: Maximum sources to discover
+        max_sources: Stop starting batches once this source count is reached;
+            the final batch can exceed it
 
     Returns:
         List of Source objects

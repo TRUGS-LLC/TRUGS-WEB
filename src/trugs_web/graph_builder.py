@@ -4,7 +4,7 @@ TRUGS Web Graph Builder
 Orchestrates the Phase 1 pipeline (discover → extract → resolve → score)
 and emits TRUGS-format graphs validated by trugs_tools.validator.
 
-Output structure follows TRUGS_RESEARCH/CRAWLER/graph_builder.py:
+Output structure (private reference removed):
   {
     "name": <topic>,
     "version": "1.0.0",
@@ -44,9 +44,9 @@ class TRUGSWebGraphBuilder:
     """
     Builds a TRUGS research graph from web sources.
 
-    Usage (async):
-        builder = TRUGSWebGraphBuilder(llm_provider="mock")
-        graph = await builder.build("machine learning", seed_urls)
+    Usage:
+        builder = TRUGSWebGraphBuilder(name="research", topic="machine learning")
+        # Populate with add_source_node(), add_entity_node(), add_relation_edge().
         builder.save("output.trug.json")
     """
 
@@ -134,7 +134,7 @@ class TRUGSWebGraphBuilder:
         return node_id
 
     def add_source_node(self, source: Source, credibility: float = 0.5) -> str:
-        """Add a WEB_SOURCE node. Returns node_id."""
+        """Add a node preserving source.source_type. Returns node_id."""
         node_id = _url_to_id(source.url)
         self._add_node(
             node_id=node_id,

@@ -42,7 +42,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_crawl.add_argument("seed_urls", nargs="+", help="seed URL(s) to crawl")
     p_crawl.add_argument("--topic", default="", help="topic hint")
     p_crawl.add_argument(
-        "--max-sources", type=int, default=20, help="max sources to discover"
+        "--max-sources",
+        type=int,
+        default=20,
+        help="source-count threshold checked before each batch; final batch may exceed it",
     )
 
     p_build = sub.add_parser(
@@ -71,7 +74,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_query.add_argument("graph", help="path to a .trug.json graph built by `build`")
     p_query.add_argument("--q", required=True, dest="query", help="query string")
     p_query.add_argument(
-        "--min-weight", type=float, default=0.5, help="min edge weight"
+        "--min-weight",
+        type=float,
+        default=0.5,
+        help="minimum node credibility in high-credibility mode; minimum edge weight otherwise",
     )
 
     p_syn = sub.add_parser(
@@ -84,7 +90,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_syn.add_argument(
         "--out", help="write the markdown report to this path (else stdout)"
     )
-    p_syn.add_argument("--min-weight", type=float, default=0.5, help="min edge weight")
+    p_syn.add_argument(
+        "--min-weight",
+        type=float,
+        default=0.5,
+        help="minimum node credibility in high-credibility mode; minimum edge weight otherwise",
+    )
 
     return parser
 

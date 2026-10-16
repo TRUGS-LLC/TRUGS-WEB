@@ -51,10 +51,11 @@ class GraphTraverser:
     Patterns:
     - concept_sources: Find sources that define/discuss a concept
     - related_concepts: Find concepts related to a given concept
-    - citation_chain: Find citation path between sources
+    - citation_chain: Find a directed graph path between nodes across any relation type
     - find_by_relation: Find all edges of a specific relation type
     - high_credibility_sources: Find high-credibility sources
-    - weighted_consensus: Find claims with multi-source support
+    - weighted_consensus: Find matching nodes with enough incoming edges meeting the weight
+      threshold, without checking distinct sources or source credibility
     - alternatives: Find alternatives to a given node
     """
 
@@ -113,8 +114,9 @@ class GraphTraverser:
         """
         Find concepts related to a given concept.
 
-        Follows edges of specified types (or all types) to find
-        related concepts within max_depth hops.
+        Traverses outgoing and incoming edges of all types within max_depth hops,
+        applying min_weight. If relation_types is supplied, filters results by each
+        returned edge's type only; earlier hops can use any relation type.
         """
         concept_nodes = self.graph.search_nodes(concept)
 
@@ -156,7 +158,7 @@ class GraphTraverser:
         )
 
     def citation_chain(self, source_id, target_id, max_depth=5):
-        """Find citation path between two sources."""
+        """Find a directed graph path between nodes across any relation type."""
         path = self.graph.find_path(source_id, target_id, max_depth)
 
         if path is None:
@@ -214,10 +216,10 @@ class GraphTraverser:
 
     def weighted_consensus(self, concept, min_sources=2, min_weight=0.5):
         """
-        Find concepts/claims supported by multiple credible sources.
+        Find matching concepts/claims with enough incoming edges above the weight threshold.
 
-        Returns nodes that have multiple incoming edges from
-        high-credibility sources.
+        Returns nodes with at least min_sources incoming edges meeting min_weight.
+        Counts edges; does not check source-node credibility or distinct sources.
         """
         concept_nodes = self.graph.search_nodes(concept)
 

@@ -10,7 +10,7 @@ Pipeline stages:
   5. **Build** — assemble a TRUGS 1.0 graph via ``TRUGSWebGraphBuilder``.
   6. **Validate** — run the validator and return the result.
 
-This was T-05 from Phase 1, deferred to Phase 3 because it needs the
+This was T-05 from Phase 1, deferred to Phase 2 because it needs the
 full pipeline in place (crawler + extractor + resolver + credibility +
 graph builder + query).
 

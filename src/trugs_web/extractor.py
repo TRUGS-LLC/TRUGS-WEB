@@ -5,7 +5,7 @@ Uses LLMs to extract entities and relations from source content.
 Supports Anthropic (Claude Haiku), OpenAI (GPT-3.5), and a MockLLMClient
 for testing without API keys.
 
-Requires: pip install trugs-tools[llm]  (for real LLM clients)
+Requires: pip install trugs-web[llm]  (for real LLM clients)
 """
 
 import json
@@ -164,7 +164,7 @@ class AnthropicClient:
             except ImportError as exc:
                 raise ImportError(
                     "anthropic is required for AnthropicClient. "
-                    "Install with: pip install trugs-tools[llm]"
+                    "Install with: pip install trugs-web[llm]"
                 ) from exc
             self._client = anthropic.AsyncAnthropic(api_key=self.api_key)
 
@@ -192,7 +192,7 @@ class OpenAIClient:
             except ImportError as exc:
                 raise ImportError(
                     "openai is required for OpenAIClient. "
-                    "Install with: pip install trugs-tools[llm]"
+                    "Install with: pip install trugs-web[llm]"
                 ) from exc
             self._client = openai.AsyncOpenAI(api_key=self.api_key)
 
