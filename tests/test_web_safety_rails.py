@@ -1,4 +1,4 @@
-"""Tier-B crawler-grade safety rails (AAA #2295 SP4).
+"""Tier-B crawler-grade safety rails (AAA (private reference removed) SP4).
 
 Marked tests so the Phase-8 vacuity-guarded recipes (SC-6 robots/rate_limit, SC-7 cost,
 SC-8 secret, SC-9 logging) and PC-6 resolve to real, passing tests.

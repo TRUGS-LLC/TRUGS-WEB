@@ -1,4 +1,4 @@
-"""T1.11 — graph-validation end-to-end (AAA #2295 SP2).
+"""T1.11 — graph-validation end-to-end (AAA (private reference removed) SP2).
 
 Closes the SC-4 grep-only gap and makes INVARIANT-2 (every emitted passive_trug validates)
 explicit: build a TRUG with TRUGSWebGraphBuilder, prove `trugs_tools.validator.validate_trug`
