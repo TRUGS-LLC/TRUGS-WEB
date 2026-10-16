@@ -81,7 +81,7 @@ For a public tool that runs LLM-backed crawls against live sites and paid APIs:
 - `trugs-tools>=2.0.0` — language core (TRL, validator, TRUG parsing)
 - `trugs-store>=2.0.0` — graph store (persistence)
 
-It never depends on any T3 system package (the cleave invariant; see AAA #2358).
+It never depends on any T3 system package (the cleave invariant; see AAA (private reference removed)).
 
 ## Output format
 
@@ -171,7 +171,7 @@ First release as a standalone, installable T2 package (versions are in lockstep 
 ### Lineage
 
 `trugs-web` descends from the web pipeline half of **trugs-tools 1.0.0** (PyPI, 2026-04-18), where these
-components lived under `trugs_tools.web.*`. The TRUGS 2.0 commons cleave (AAA #2373) split the web tier onto
+components lived under `trugs_tools.web.*`. The TRUGS 2.0 commons cleave (AAA (private reference removed)) split the web tier onto
 its own wheel with its own binary, `trugs-web`. The 1.0 → 2.0 module migration table is in the
 [trugs-tools CHANGELOG](https://github.com/TRUGS-LLC/TRUGS-TOOLS/blob/main/CHANGELOG.md).
 
@@ -180,17 +180,17 @@ its own wheel with its own binary, `trugs-web`. The 1.0 → 2.0 module migration
 - The `trugs-web` binary: four ingestion+query verbs (`crawl` / `build` / `query` / `synthesize`), each with
   examples and documented exit codes in `--help`.
 - Installable Python package: `pip install trugs-web[web,llm]` (web = httpx, beautifulsoup4, lxml; llm = anthropic, openai).
-- Ingestion pipeline (AAA #2295 SP1–SP3): source discovery, entity/relation/citation extraction (LLM-backed,
+- Ingestion pipeline (AAA (private reference removed) SP1–SP3): source discovery, entity/relation/citation extraction (LLM-backed,
   model-agnostic via `LLMClient` protocol), entity resolution (deduplication), credibility scoring, TRUGS 1.0 graph
   emission + validation via `trugs_tools.validator.validate_trug`.
 - Query subsystem: graph loading, traversal, report synthesis (markdown rendering).
 - Weight topology: query-time node importance computation from inbound edge topology across loaded TRUGs.
-- Tier-B safety rails (AAA #2295 SP4): robots.txt politeness (fail-open), inter-request delay + exponential backoff,
+- Tier-B safety rails (AAA (private reference removed) SP4): robots.txt politeness (fail-open), inter-request delay + exponential backoff,
   LLM cost guard (budget ceiling on calls/tokens), structured logging, API-key-from-environment secrets (never inline,
   never logged).
 - Package-owned test suite (`tests/`): 270 passing tests with pytest markers (`robots`, `rate_limit`, `cost`,
   `secret`, `logging`, `graph_validation_e2e`); respx-mocked HTTP, MockLLMClient for zero-API-key testing.
-- TRUGS 1.0 graph validation e2e test (AAA #2295 SP2): end-to-end crawl → extract → resolve → credibility → build →
+- TRUGS 1.0 graph validation e2e test (AAA (private reference removed) SP2): end-to-end crawl → extract → resolve → credibility → build →
   validate_trug.
 
 ### Changed
@@ -222,5 +222,5 @@ Hub federation and graph refresh are scaffolded in `deferred_phase2/` but not sh
 The `trugs-tools` / `trugs-store` 2.0.0 final commons are now on PyPI, and the clean-venv
 install gate (SC-1) is verified green against them (270 tests pass from the built wheel;
 `trugs_tools.validator.validate_trug` resolves from the published 2.0.0). `trugs-web` itself is
-**not yet published** — the PyPI publish + public repo graduation (AAA #2295 SP6) is a separate,
+**not yet published** — the PyPI publish + public repo graduation (AAA (private reference removed) SP6) is a separate,
 explicit step pending HITM go.

@@ -66,7 +66,7 @@ class SourceDiscoverer:
     Discovers sources starting from seed URLs.
 
     Uses async HTTP scraping (no LLM) to find and categorize sources. Tier-B safety rails
-    (AAA #2295 SP4): robots.txt politeness (fail-open), an inter-request delay, and
+    (AAA (private reference removed) SP4): robots.txt politeness (fail-open), an inter-request delay, and
     exponential backoff on retryable HTTP status — all opt-in via the constructor so default
     construction is unchanged.
     """

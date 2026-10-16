@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
 ]
 # T2 sits ABOVE T1: depends on the language core (trugs-tools) + the graph store
-# (trugs-store). It NEVER depends on any T3 system package (the AAA #2358 cleave invariant).
+# (trugs-store). It NEVER depends on any T3 system package (the AAA (private reference removed) cleave invariant).
 dependencies = [
     "trugs-tools>=2.0.0,<3.0.0",
     # Declared even though nothing in this package imports it directly: trugs-tools

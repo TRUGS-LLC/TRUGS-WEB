@@ -1,4 +1,4 @@
-"""CLI smoke tests (AAA #2295 SP3) — covers SC-5 (cli exposes help) + the query/synthesize verbs."""
+"""CLI smoke tests (AAA (private reference removed) SP3) — covers SC-5 (cli exposes help) + the query/synthesize verbs."""
 
 import pytest
 

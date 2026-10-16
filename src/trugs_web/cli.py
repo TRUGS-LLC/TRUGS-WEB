@@ -1,4 +1,4 @@
-"""trugs-web command-line interface (AAA #2295 SP3).
+"""trugs-web command-line interface (AAA (private reference removed) SP3).
 
 trugs-web is a ONE-WAY, passive web-to-TRUG builder: it crawls sources and emits passive
 TRUGS graphs for querying. It never closes the self-developing loop (the reserved patent
