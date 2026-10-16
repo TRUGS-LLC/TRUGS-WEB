@@ -134,7 +134,7 @@ class TRUGSWebGraphBuilder:
         return node_id
 
     def add_source_node(self, source: Source, credibility: float = 0.5) -> str:
-        """Add a WEB_SOURCE node. Returns node_id."""
+        """Add a node preserving source.source_type. Returns node_id."""
         node_id = _url_to_id(source.url)
         self._add_node(
             node_id=node_id,

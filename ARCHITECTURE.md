@@ -52,7 +52,7 @@ QUERY (loader, traverse, synthesize)
 | Class / Function | Role |
 |---|---|
 | `Source` | Dataclass: `{url, title, description, source_type, content, outbound_links, metadata}`. Properties: `.domain`, `.is_academic`, `.is_github`. |
-| `SourceDiscoverer` | Async crawler. Tier-B safety (see below): respects `robots.txt` (fail-open), delays during batch preparation, exponential backoff on 429/5xx. Constructor opt-in: `request_delay=0.0`, `respect_robots=True`, `max_retries=2`. Batch requests run in parallel without spacing. |
+| `SourceDiscoverer` | Async crawler. Tier-B safety (see below): respects `robots.txt` (fail-open), delays during batch preparation, exponential backoff on 429/5xx. Constructor defaults: `request_delay=0.0`, `respect_robots=True`, `max_retries=2`. Batch requests run in parallel without spacing. |
 | `discover_sources()` | Convenience entry point: `async discover_sources(seed_urls, topic='', max_sources=50) → Source[]`. Configure `max_depth` on `SourceDiscoverer` instead. |
 
 **Key APIs:**

@@ -191,6 +191,9 @@ its own wheel with its own binary, `trugs-web`. The 1.0 → 2.0 module migration
 - Tier-B safety rails (AAA (private reference removed) SP4): robots.txt politeness (fail-open), inter-request delay + exponential backoff,
   LLM cost guard (budget ceiling on calls/tokens), structured logging, API-key-from-environment secrets (never inline,
   never logged).
+  Correction, 2026-10-16: delay occurs during batch preparation; parallel fetches are unspaced.
+  `CostGuard` is a standalone utility, not invoked by crawl/build or extraction. An explicit API-key
+  argument takes precedence over environment lookup; keys need not come from the environment.
 - Package-owned test suite (`tests/`): 270 passing tests with pytest markers (`robots`, `rate_limit`, `cost`,
   `secret`, `logging`, `graph_validation_e2e`); respx-mocked HTTP, MockLLMClient for zero-API-key testing.
 - TRUGS 1.0 graph validation e2e test (AAA (private reference removed) SP2): end-to-end crawl → extract → resolve → credibility → build →
