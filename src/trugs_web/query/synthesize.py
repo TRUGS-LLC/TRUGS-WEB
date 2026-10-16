@@ -351,7 +351,7 @@ class ReportSynthesizer:
 
         if result.avg_weight < 0.5:
             recommendations.append(
-                "Average source credibility is low. "
+                "Average edge weight is low, or no edges were returned. "
                 "Cross-reference with authoritative sources."
             )
 
@@ -419,7 +419,8 @@ async def generate_report(
     Args:
         graph: The knowledge graph.
         query: User query string.
-        min_weight: Minimum edge weight for filtering.
+        min_weight: Minimum node credibility in high-credibility mode;
+            minimum edge weight in other traversal modes.
         use_llm: Whether to use LLM for synthesis.
         llm_client: LLM client for enhanced synthesis.
         output_path: Optional path to save the report.
