@@ -1,10 +1,10 @@
 # trugs-web
 
-**Web-to-TRUG builder.** One binary, `trugs-web` — crawl web sources, extract entities and relations with LLM assistance (model-agnostic), resolve and score credibility, and build a passive TRUGS knowledge graph for querying. It builds graphs; it never closes the self-developing loop (reserved patent mechanism, US app 19/575,491).
+**Web-to-TRUG builder.** One binary, `trugs-web` — crawl web sources, extract entities and relations with LLM assistance (model-agnostic), resolve and score credibility, and build a passive TRUGS knowledge graph for querying. It builds graphs; it never closes the self-developing loop.
 
 ## What & Why
 
-`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. This boundary is licensed: the reserved patent (US 19/575,491) protects self-modifying graph substrates. A downstream user who wires this tool's passive output into a self-modifying agent operates outside this grant.
+`trugs-web` is a **one-way, passive** research tool. You point it at seed URLs; it discovers sources, extracts structured knowledge (entities, relations, citations) via LLM-backed natural language processing, resolves entity identity across sources, scores credibility from topology and metadata, and emits a TRUGS format graph. That graph is a **passive data structure**—queryable, traversable, reportable—but inert. The tool does not modify it in place; no agent closes the feedback loop. A downstream user who wires this tool's passive output into a self-modifying agent operates outside this grant.
 
 As a **T2 reference application** (sibling of `trugs-folder`), `trugs-web` depends downward on the T1 commons: `trugs-tools>=2.0.0,<3.0.0` (language, validator) and `trugs-store>=2.0.0,<3.0.0` (graph persistence). v1 ships the ingestion pipeline (crawler, extractor, resolver, credibility scorer, graph builder), query subsystem (loader, traverse, synthesize), and weight computation (topology-based importance ranking). Hub federation and refresh are deferred to Phase 2 (see `deferred_phase2/`).
 
@@ -154,11 +154,16 @@ Graph validation uses `trugs_tools.validator` internally — `TRUGSWebGraphBuild
 
 **Active — the canonical home of `trugs-web`, where the package is developed and released.** Current version `2.0.0`; maturity **Beta**. v1 implements the Phase 1 ingestion and query pipeline. Hub federation, refresh, and self-developing loop reservation are deferred to Phase 2. Test coverage: 273 passing (respx-mocked HTTP, MockLLMClient). Pytest markers: `robots`, `rate_limit`, `cost`, `secret`, `logging`, `graph_validation_e2e`.
 
+## Scope
+
+This software does not include self-modifying TRUGS: graphs that change their
+own structure while they run.
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-This license covers a **one-way, passive** tool. The reserved patent mechanism (US app 19/575,491) protects self-modifying graph substrates. See [NOTICE](NOTICE) for boundary and commercial licensing.
+This license covers a **one-way, passive** tool. See [NOTICE](NOTICE) for boundary and commercial licensing.
 
 ## Contributing
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-**trugs-web v1** is a ONE-WAY, passive web-to-TRUG builder. It crawls web sources, extracts entities and relations via LLM (model-agnostic: Anthropic, OpenAI, or mock), resolves duplicates, scores credibility, and emits a passive TRUGS knowledge graph for querying. It **never closes the self-developing loop** — the reserved patent mechanism (U.S. app 19/575,491).
+**trugs-web v1** is a ONE-WAY, passive web-to-TRUG builder. It crawls web sources, extracts entities and relations via LLM (model-agnostic: Anthropic, OpenAI, or mock), resolves duplicates, scores credibility, and emits a passive TRUGS knowledge graph for querying. It **never closes the self-developing loop**.
 
 - **Type:** T2 reference application (sibling of `trugs-folder`)
 - **Dependencies:** T1 commons (`trugs-tools>=2.0.0`, `trugs-store>=2.0.0`)
@@ -415,10 +415,6 @@ pip install "trugs-web[test]"     # pytest, respx, pytest-asyncio (testing)
 
 **PATENT NOTICE** (NOTICE file):
 > This license covers a ONE-WAY, PASSIVE tool. It does NOT cover self-developing graph systems (agent-in-the-loop mutation, no compile boundary).
-> 
-> U.S. patent application 19/575,491 (EGS-979) reserves self-modifying agent systems. Downstream users who wire this tool's passive output into a self-modifying agent operate outside this grant.
-> 
-> AGPL 3.0 and commercial licensing available at https://github.com/Xepayac/XEPAYAC_LLC.
 
 ---
 

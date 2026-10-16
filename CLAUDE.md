@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working in this repository.
 
 ## License — do not alter the terms
 
-- `LICENSE` is **Apache-2.0**; `NOTICE` carries the patent carve-out (US app 19/575,491 + the Xepayac AGPL/commercial pointer for the reserved self-developing-graph mechanism). Preserve both verbatim; do not change the license terms.
+- `LICENSE` is **Apache-2.0**; `NOTICE` carries the patent carve-out. Preserve both verbatim; do not change the license terms.
 
 ## Development Workflow
 

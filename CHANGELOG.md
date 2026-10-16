@@ -162,7 +162,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+- `LICENSE` is the official Apache License 2.0 text; `NOTICE` carries the attribution only, its patent
+  paragraph removed; the README gains a Scope section.
 
 ## [2.0.0] — 2026-06-17
 

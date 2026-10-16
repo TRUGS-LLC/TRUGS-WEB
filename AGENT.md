@@ -1,6 +1,6 @@
 # trugs-web v1 AGENT.md
 
-**trugs-web** is a one-way, passive web-to-TRUG builder: crawl web sources → extract entities/relations (LLM-backed, model-agnostic) → resolve → score credibility → emit a passive TRUGS graph for querying. It never closes the self-developing loop (reserved by US patent app 19/575,491).
+**trugs-web** is a one-way, passive web-to-TRUG builder: crawl web sources → extract entities/relations (LLM-backed, model-agnostic) → resolve → score credibility → emit a passive TRUGS graph for querying. It never closes the self-developing loop.
 
 ## Module Map
 
@@ -260,4 +260,4 @@ grep -A 5 "def __init__.*llm" src/trugs_web/extractor.py
 ## Version
 
 - **trugs-web v2.0.0** (Beta, parity with trugs-folder / trugs-tools)
-- **License:** Apache-2.0 with patent NOTICE (US app 19/575,491)
+- **License:** Apache-2.0 with patent NOTICE
