@@ -66,13 +66,25 @@ Paths are relative to the input root. Files carry extension, byte length and
 SHA-256; folders carry the total included byte length and a digest of the sorted
 child names, kinds and digests. No time or absolute root path is recorded.
 Markdown's first ATX heading (`#` through `######`, followed by whitespace or
-end of line) or setext heading (text underlined with `=` or `-`) is recorded.
-Headings may have up to three leading spaces. Four-column indentation, including
-tabs, is code; headings inside it or backtick/tilde code fences are skipped.
-List and blockquote prefixes are handled before these checks.
-Fences have at least three matching markers and close with at least the opening
-length. HTML's title is also recorded. Markdown inline and
-reference links and HTML `href`/`src` produce references. Addresses leaving the
+end of line) or underlined (setext) heading (text underlined with `=` or `-`)
+is recorded. A setext heading may continue across lines, including indented
+continuation lines of an open paragraph. The title retains its inline Markdown
+notation and joins its lines with spaces.
+
+Markdown inline links and images produce references, including bare targets
+with balanced parentheses, backslash-escaped punctuation, and angle-bracket
+targets. Reference-definition targets are also recorded. Code (fenced and
+indented), HTML blocks and HTML comments contribute no link and no heading;
+inline code spans and inline HTML tokens contribute no link. List and blockquote
+prefixes are handled before block checks. Headings may have up to three leading
+spaces; four-column indentation, including tabs, starts code outside an open
+paragraph. Backtick/tilde fences have at least three matching markers and close
+with at least the opening length. These Markdown rules are checked against
+CommonMark using markdown-it-py in the test suite; other Markdown extensions
+are outside this reader's scope.
+
+HTML's title is also recorded, and HTML `href`/`src` produce references.
+Addresses leaving the
 folder are recorded without being fetched. Missing local targets have
 `missing: true`. Existing excluded targets stay excluded. Symlinks are recorded
 by their link text and never followed. Binary, undecodable and unsupported

@@ -12,6 +12,8 @@ import posixpath
 import re
 from urllib.parse import unquote, urlsplit
 
+from trugs_web.markdown import read_markdown
+
 JS_EXTENSIONS = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts", ".json")
 JS_IMPORT = re.compile(
     r"\b(?:import|export)\s+(?:[^;]*?\s+from\s*)?['\"](\.{1,2}/[^'\"]+)['\"]"
@@ -165,92 +167,6 @@ def _ignore_line(raw: bytes) -> bytes:
                 end = i + 1
             i += 1
     return raw[:end]
-
-
-def _markdown_title(text: str) -> str | None:
-    """First ATX or setext heading outside fenced or four-column-indented code."""
-    fence = ""
-    fence_length = 0
-    fence_quotes = 0
-    fence_indent = 0
-    quote_depth = 0
-    list_indents: list[int] = []
-    paragraph: list[str] = []
-    for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
-        line = line.expandtabs(4)
-        if fence:
-            content = line
-            in_container = True
-            for _ in range(fence_quotes):
-                quote = re.match(r" {0,3}> ?", content)
-                if not quote:
-                    in_container = False
-                    break
-                content = content[quote.end() :]
-            if (
-                content.strip()
-                and len(content) - len(content.lstrip(" ")) < fence_indent
-            ):
-                in_container = False
-            if in_container:
-                content = content[fence_indent:]
-                if re.fullmatch(
-                    r" {0,3}" + fence + "{" + str(fence_length) + r",}[ \t]*", content
-                ):
-                    fence = ""
-                continue
-            # Leaving a list or quote ends its unclosed fenced block too.
-            fence = ""
-            paragraph = []
-        quotes = 0
-        while quote := re.match(r" {0,3}> ?", line):
-            quotes += 1
-            line = line[quote.end() :]
-        if quotes != quote_depth:
-            paragraph = []
-            list_indents = []
-        quote_depth = quotes
-        indent = len(line) - len(line.lstrip(" "))
-        if line.strip():
-            while list_indents and indent < list_indents[-1]:
-                list_indents.pop()
-        consumed = list_indents[-1] if list_indents else 0
-        line = line[consumed:]
-        while item := re.match(r" {0,3}(?:[-+*]|\d{1,9}[.)])( +|$)", line):
-            # More than four spaces after a marker leave indented code in the item.
-            width = (
-                item.end() - max(0, len(item[1]) - 1)
-                if len(item[1]) > 4
-                else item.end()
-            )
-            consumed += width
-            list_indents.append(consumed)
-            paragraph = []
-            line = line[width:]
-        opening = re.match(r" {0,3}(`{3,}|~{3,})(.*)$", line)
-        if opening and (opening[1][0] == "~" or "`" not in opening[2]):
-            fence = opening[1][0]
-            fence_length = len(opening[1])
-            fence_quotes = quote_depth
-            fence_indent = consumed
-            paragraph = []
-            continue
-        if not line.strip() or line.startswith("    "):
-            paragraph = []
-            continue
-        atx = re.match(r" {0,3}#{1,6}(?:[ \t]+(.*)|$)", line)
-        if atx:
-            return re.sub(r"(?:^|[ \t]+)#+[ \t]*$", "", atx[1] or "").strip()
-        if paragraph and re.fullmatch(r" {0,3}(?:=+|-+)[ \t]*", line):
-            return " ".join(paragraph)
-        # A thematic break or another block cannot supply a setext title.
-        if re.match(r" {0,3}(?:>|[-+*][ \t]|\d+[.)][ \t])", line) or re.fullmatch(
-            r" {0,3}(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,}|=+)", line
-        ):
-            paragraph = []
-        else:
-            paragraph.append(line.strip())
-    return None
 
 
 class IgnoreRules:
@@ -531,15 +447,11 @@ def map_folder(folder: str | Path, *, include_hidden: bool = False) -> dict:
         props = nodes[path]["properties"]
         kind = props["kind"]
         if kind in {"md", "markdown"}:
-            title = _markdown_title(text)
+            title, addresses = read_markdown(text)
             if title is not None:
                 props["title"] = title
-            for match in re.finditer(
-                r"!?\[[^\]]*\]\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)|^ {0,3}\[[^\]]+\]:\s*(<[^>]*>|\S+)",
-                text,
-                re.M,
-            ):
-                reference(path, (match.group(1) or match.group(2)).strip("<>"))
+            for address in addresses:
+                reference(path, address)
         elif kind in {"html", "htm"}:
             html = _HTML(text)
             if html.title:
