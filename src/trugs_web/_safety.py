@@ -1,4 +1,4 @@
-"""Tier-B crawler-grade safety rails for the public trugs-web tool (AAA (private reference removed) SP4).
+"""Crawler crawler-grade safety rails for the public trugs-web tool.
 
 A public, LLM-backed network crawler that strangers run against live sites and paid APIs needs
 guard rails a local tool never does:

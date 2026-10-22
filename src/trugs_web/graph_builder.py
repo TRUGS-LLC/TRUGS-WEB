@@ -4,7 +4,7 @@ TRUGS Web Graph Builder
 Orchestrates the Phase 1 pipeline (discover → extract → resolve → score)
 and emits TRUGS-format graphs validated by trugs_tools.validator.
 
-Output structure (private reference removed):
+Output structure:
   {
     "name": <topic>,
     "version": "1.0.0",
@@ -145,6 +145,7 @@ class TRUGSWebGraphBuilder:
                 "description": source.description,
                 "domain": source.domain,
                 "credibility": round(credibility, 3),
+                "outbound_links": list(source.outbound_links),
             },
             metric_level=f"BASE_{source.source_type}",
         )
@@ -270,8 +271,13 @@ class _WebPipeline:
         model: Optional[str] = None,
         max_sources: int = 50,
         max_depth: int = 2,
+        allow_other_hosts: bool = False,
     ):
-        self.discoverer = SourceDiscoverer(max_sources=max_sources, max_depth=max_depth)
+        self.discoverer = SourceDiscoverer(
+            max_sources=max_sources,
+            max_depth=max_depth,
+            allow_other_hosts=allow_other_hosts,
+        )
         self.entity_extractor, self.relation_extractor = create_extractor(
             provider=llm_provider, api_key=api_key, model=model
         )
@@ -365,6 +371,7 @@ async def build_graph(
     model: Optional[str] = None,
     output_path: Optional[str] = None,
     validate: bool = True,
+    allow_other_hosts: bool = False,
 ) -> TRUGSWebGraphBuilder:
     """
     Build a TRUGS research graph from web sources.
@@ -385,6 +392,7 @@ async def build_graph(
         llm_provider=llm_provider,
         api_key=api_key,
         model=model,
+        allow_other_hosts=allow_other_hosts,
     )
     builder = await pipeline.run(topic, seed_urls)
 

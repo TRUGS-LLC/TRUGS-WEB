@@ -29,7 +29,7 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     # Enforced: mypy (config in pyproject [tool.mypy]) must pass. The v1 engine's type
-    # debt was paid down in the SP3–SP5 PR ((private reference removed)) — keep it green.
+    # checks apply to the shipped package.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

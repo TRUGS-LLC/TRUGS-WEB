@@ -1,4 +1,4 @@
-"""CLI smoke tests (AAA (private reference removed) SP3) — covers SC-5 (cli exposes help) + the query/synthesize verbs."""
+"""CLI smoke tests — covers SC-5 (cli exposes help) + the query/synthesize verbs."""
 
 import pytest
 
@@ -9,7 +9,7 @@ from trugs_web.graph_builder import TRUGSWebGraphBuilder
 
 def test_version(capsys):
     assert main(["--version"]) == 0
-    assert "trugs-web 2.0.0" in capsys.readouterr().out
+    assert "trugs-web 2.1.0" in capsys.readouterr().out
 
 
 def test_help_exits_zero(capsys):

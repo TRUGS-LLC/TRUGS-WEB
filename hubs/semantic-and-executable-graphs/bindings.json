@@ -1,0 +1,410 @@
+{
+  "format": "core-hub-sample-v0",
+  "unsigned": true,
+  "source": {
+    "repository": "TRUGS-LLC/TRUGS",
+    "revision": "37bb78c781adba7fa6a759e4688feb1b2e29c604",
+    "paper": "PAPER/trugs.tex",
+    "sections": [
+      "From Semantic Graphs to Executable Language",
+      "Related Work"
+    ],
+    "paper_sha256": "47f167498bcc8af342b01cdc34eb49745a438c68c75340718318ab88cde90af2",
+    "bibliography": "PAPER/trugs.bib",
+    "bibliography_sha256": "24681d918e0ff4f23bdcf60a9e45040f42ac428967ae378c16eec832eba07712"
+  },
+  "systems": {
+    "semantic_memory": {
+      "title": "Semantic Memory",
+      "strength": "Networks express associations between concepts.",
+      "gap": "They do not specify operations or obligations."
+    },
+    "semantic_web": {
+      "title": "Semantic Web",
+      "strength": "Shared identifiers and linked statements support knowledge exchange.",
+      "gap": "Execution needs separate programs."
+    },
+    "ontologies": {
+      "title": "Ontologies",
+      "strength": "Shared conceptual descriptions support reuse.",
+      "gap": "An ontology alone does not order computation."
+    },
+    "rdf": {
+      "title": "Rdf",
+      "strength": "A standard graph data model supports exchange and traversal.",
+      "gap": "It does not provide an instruction language."
+    },
+    "owl": {
+      "title": "Owl",
+      "strength": "Ontology logic enables inference over semantic statements.",
+      "gap": "Inference and general operations remain distinct."
+    },
+    "petri_nets": {
+      "title": "Petri Nets",
+      "strength": "Transition firing makes a graph computational.",
+      "gap": "Operations do not carry the semantic vocabulary of knowledge graphs."
+    },
+    "parallel_graphs": {
+      "title": "Parallel Graphs",
+      "strength": "Graph models support reasoning about parallel computation.",
+      "gap": "They do not provide controlled English or obligations."
+    },
+    "dataflow": {
+      "title": "Dataflow",
+      "strength": "The graph directly defines the flow of computation.",
+      "gap": "Operations remain opaque to a shared semantic vocabulary."
+    },
+    "actors": {
+      "title": "Actors",
+      "strength": "Message-passing agents provide a graph model of computation.",
+      "gap": "Message content is not a closed semantic language."
+    },
+    "statecharts": {
+      "title": "Statecharts",
+      "strength": "A visual graph can be readable and executable.",
+      "gap": "It does not provide the semantic graph language described here."
+    },
+    "tensorflow": {
+      "title": "Tensorflow",
+      "strength": "Computation graphs scale dataflow execution.",
+      "gap": "Operation meanings are supplied separately from the graph."
+    },
+    "spark": {
+      "title": "Spark",
+      "strength": "Distributed dataflow graphs support large computations.",
+      "gap": "The graph does not type the meaning of its instructions as controlled English."
+    },
+    "controlled_languages": {
+      "title": "Controlled Languages",
+      "strength": "Controlled languages demonstrate precise constrained natural language.",
+      "gap": "The surveyed tradition commonly targets logic rather than a mutable general graph."
+    },
+    "ace": {
+      "title": "Ace",
+      "strength": "Constrained English can represent knowledge unambiguously and support OWL translation.",
+      "gap": "The cited approach targets logic rather than a general graph of operations."
+    },
+    "attempto": {
+      "title": "Attempto",
+      "strength": "English specifications produce queryable Prolog for simulation and validation.",
+      "gap": "The Prolog is not decompiled back to the authored sentence."
+    },
+    "cpl": {
+      "title": "Cpl",
+      "strength": "Restricted English supports acquiring and using knowledge.",
+      "gap": "Its knowledge target is not the typed general graph used here."
+    },
+    "peng": {
+      "title": "Peng",
+      "strength": "English can serve as a formal specification surface.",
+      "gap": "The paper places it in the logic-targeted language tradition."
+    },
+    "formal_semantics": {
+      "title": "Formal Semantics",
+      "strength": "Compositional semantics links language to precise formal meaning.",
+      "gap": "Logical representations are not directly the operational graph."
+    },
+    "sydney_owl": {
+      "title": "Sydney Owl",
+      "strength": "Controlled language maps bidirectionally to OWL.",
+      "gap": "The target is ontology logic rather than a general graph of computation."
+    },
+    "answer_sets": {
+      "title": "Answer Sets",
+      "strength": "Programs can be specified and verbalised with semantic round trips.",
+      "gap": "The target is a logic program and the round trip is semantic rather than token-preserving."
+    },
+    "owl_services": {
+      "title": "Owl Services",
+      "strength": "Semantic descriptions support discovery, invocation and composition of services.",
+      "gap": "There is no controlled-language sentence surface or sentence decompilation."
+    },
+    "opm": {
+      "title": "Opm",
+      "strength": "One diagram integrates structure and behavior and supports executable simulation.",
+      "gap": "Text is generated from diagrams; the vocabulary lacks obligation and permission modalities."
+    },
+    "opcat": {
+      "title": "Opcat",
+      "strength": "A bimodal tool supports object-process models.",
+      "gap": "The diagram is authored first; it lacks typed deontic edges."
+    },
+    "exekg": {
+      "title": "Exekg",
+      "strength": "Semantic machine-learning pipelines translate into executable Python.",
+      "gap": "The GUI-authored approach is specific to analytics and carries no obligations."
+    },
+    "model_extraction": {
+      "title": "Model Extraction",
+      "strength": "Language models help build graphs from unstructured sources.",
+      "gap": "Extraction stages can lose information and require schema and knowledge fusion."
+    },
+    "models_and_graphs": {
+      "title": "Models And Graphs",
+      "strength": "Models and knowledge graphs can complement each other.",
+      "gap": "Extraction does not itself eliminate the representation gap."
+    },
+    "json_ld": {
+      "title": "Json Ld",
+      "strength": "A standard linked-data representation supports precise exchange.",
+      "gap": "Direct authoring still commonly needs translation tools."
+    },
+    "property_graphs": {
+      "title": "Property Graphs",
+      "strength": "Properties and relations support flexible graph storage.",
+      "gap": "The storage model is not a constrained English surface."
+    },
+    "mcp": {
+      "title": "Mcp",
+      "strength": "A protocol standardizes tool requests and responses.",
+      "gap": "Communication mechanics do not establish shared word meanings."
+    },
+    "langgraph": {
+      "title": "Langgraph",
+      "strength": "State-machine graphs organize model workflows.",
+      "gap": "Node content remains code or opaque natural language."
+    },
+    "autogen": {
+      "title": "Autogen",
+      "strength": "Conversation topology organizes cooperating agents.",
+      "gap": "The topology does not type the meaning of their content."
+    },
+    "crewai": {
+      "title": "Crewai",
+      "strength": "Role hierarchies organize agent work.",
+      "gap": "The hierarchy does not define a closed semantic language for instructions."
+    },
+    "dspy": {
+      "title": "Dspy",
+      "strength": "Typed signatures and declarative modules give pipelines semantic structure.",
+      "gap": "Semantics are at module granularity rather than every instruction word."
+    },
+    "guided_generation": {
+      "title": "Guided Generation",
+      "strength": "Constrained decoding enforces structured output syntax.",
+      "gap": "Valid structure alone does not ensure valid meaning."
+    },
+    "slot": {
+      "title": "Slot",
+      "strength": "Structured generation improves output format compliance.",
+      "gap": "Format compliance alone does not validate semantic combinations."
+    },
+    "trugs": {
+      "title": "TRUGS",
+      "strength": "Controlled English compiles to a typed general graph with a syntactic round trip and typed obligations.",
+      "gap": "It requires a closed vocabulary and valid compositions; extraction from arbitrary prose still needs a separate process. This sample uses core relations, is unsigned, and does not implement the draft hub services."
+    }
+  },
+  "resources": {
+    "quillian1968semantic": {
+      "title": "Semantic Memory",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L319",
+      "bibliography_entry": "quillian1968semantic",
+      "entry_sha256": "d2227e5fd6eabbeaa1b91f0e38aef07f2774add124e425d7c0e8a66212a32f7d"
+    },
+    "berners2001semantic": {
+      "title": "The Semantic Web",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L330",
+      "bibliography_entry": "berners2001semantic",
+      "entry_sha256": "a312aef740453cb1afec39d176259bb85fbfd166c22e7b80962f2a9b5a87c591"
+    },
+    "gruber1993translation": {
+      "title": "A Translation Approach to Portable Ontology Specifications",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L198",
+      "bibliography_entry": "gruber1993translation",
+      "entry_sha256": "40f71ec66b2bd494820cff0e684bddd6e60c636d348c6777623c76bf7fa92e27"
+    },
+    "rdf2014": {
+      "title": "RDF 1.1 Concepts and Abstract Syntax",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L141",
+      "bibliography_entry": "rdf2014",
+      "entry_sha256": "7637b852d272a4940f29c3d93b280c210778154d0b09cd25fe43824d5b37dcd9"
+    },
+    "owl2012": {
+      "title": "OWL 2 Web Ontology Language Document Overview",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L149",
+      "bibliography_entry": "owl2012",
+      "entry_sha256": "415b8d77200f060702e5d47c239c315467649ad5e18d998bff02ad37d68679de"
+    },
+    "petri1962kommunikation": {
+      "title": "Kommunikation mit Automaten",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L256",
+      "bibliography_entry": "petri1962kommunikation",
+      "entry_sha256": "f136ae1e82ed69eaabc7c94589fcbb86bc6b43d71f795db92911005a119edf89"
+    },
+    "karp1966properties": {
+      "title": "Properties of a Model for Parallel Computations: Determinacy, Termination, Queueing",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L265",
+      "bibliography_entry": "karp1966properties",
+      "entry_sha256": "569e0ace63eb5adfac59624c992b7a32870a164c286270a4ad6d0c275b7f3e2b"
+    },
+    "dennis1975preliminary": {
+      "title": "A Preliminary Architecture for a Basic Data-Flow Processor",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L275",
+      "bibliography_entry": "dennis1975preliminary",
+      "entry_sha256": "1cf67030d9a15a31b525b6789db8b476fe96ef8e8a3c0d462408f1070526708c"
+    },
+    "hewitt1973universal": {
+      "title": "A Universal Modular ACTOR Formalism for Artificial Intelligence",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L283",
+      "bibliography_entry": "hewitt1973universal",
+      "entry_sha256": "5f518d2607ec6abe1e80d961726a3e367f9f3c5c0d0c62641e76ff7287c41c3c"
+    },
+    "harel1987statecharts": {
+      "title": "Statecharts: A Visual Formalism for Complex Systems",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L291",
+      "bibliography_entry": "harel1987statecharts",
+      "entry_sha256": "1a2ec0a8a3ac0cf94cd37d32774a6df185b5d23f1d61e64556afc2b81975bbf3"
+    },
+    "abadi2016tensorflow": {
+      "title": "TensorFlow: A System for Large-Scale Machine Learning",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L301",
+      "bibliography_entry": "abadi2016tensorflow",
+      "entry_sha256": "5399ece7442875e23a1ad3797bebbab40c235edf7d82304fc67e1bfd3516f9f2"
+    },
+    "zaharia2012resilient": {
+      "title": "Resilient Distributed Datasets: A Fault-Tolerant Abstraction for In-Memory Cluster Computing",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L309",
+      "bibliography_entry": "zaharia2012resilient",
+      "entry_sha256": "587a1827295386d7338b50dba2a856b8c44cb9ec7dfd06f387f8bc28aa3e7c1e"
+    },
+    "kuhn2014survey": {
+      "title": "A Survey and Classification of Controlled Natural Languages",
+      "address": "https://doi.org/10.1162/COLI_a_00168",
+      "bibliography_entry": "kuhn2014survey",
+      "entry_sha256": "aaae5ad209789961b732a7d39106125ecb383de9fb31f6649f34b513d69998a7"
+    },
+    "fuchs2008attempto": {
+      "title": "Attempto Controlled English for Knowledge Representation",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L15",
+      "bibliography_entry": "fuchs2008attempto",
+      "entry_sha256": "93012caa3340555cba209e87099972f4e6dbfe4ef0dd2fe8fa7af52f45555d00"
+    },
+    "schwitter1996attempto": {
+      "title": "Attempto \u2014 From Specifications in Controlled Natural Language towards Executable Specifications",
+      "address": "https://arxiv.org/abs/cmp-lg/9603004",
+      "bibliography_entry": "schwitter1996attempto",
+      "entry_sha256": "f18884afafbf0f88c2ff50bb887a36967e7be89d4eeb144ea880c41dffd1cc46"
+    },
+    "clark2005class": {
+      "title": "Acquiring and Using World Knowledge Using a Restricted Subset of English",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L24",
+      "bibliography_entry": "clark2005class",
+      "entry_sha256": "ee4900d6fd0c942b635121ac112f72cb105eb65de08f9dab191ebbfb8e1c598f"
+    },
+    "schwitter2002english": {
+      "title": "English as a Formal Specification Language",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L31",
+      "bibliography_entry": "schwitter2002english",
+      "entry_sha256": "85a0448c6bb1a4515a6c64465f1132be26617b64632a5117694b79275abbeb44"
+    },
+    "montague1973proper": {
+      "title": "The Proper Treatment of Quantification in Ordinary English",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L49",
+      "bibliography_entry": "montague1973proper",
+      "entry_sha256": "e0671ff6d0186c8fd5074e7938cca004234c39555844e07768bfc43c4880454a"
+    },
+    "cregan2007sydney": {
+      "title": "Sydney OWL Syntax \u2014 towards a Controlled Natural Language Syntax for OWL 1.1",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L40",
+      "bibliography_entry": "cregan2007sydney",
+      "entry_sha256": "57734fcacf56ec96d183aba35a176d3b9c8ed98ed0cf51e09349442e254e6ed4"
+    },
+    "schwitter2018asp": {
+      "title": "Specifying and Verbalising Answer Set Programs in Controlled Natural Language",
+      "address": "https://arxiv.org/abs/1804.10765",
+      "bibliography_entry": "schwitter2018asp",
+      "entry_sha256": "b21222cc3b90240e9cb02f328a65533fa45a9b517bb4f7be264c65b7ced6df14"
+    },
+    "owls2004": {
+      "title": "OWL-S: Semantic Markup for Web Services",
+      "address": "https://www.w3.org/submissions/2004/SUBM-OWL-S-20041122/",
+      "bibliography_entry": "owls2004",
+      "entry_sha256": "9c69f6e277e462501534ce4366cae993f1f0c77b50e8259bd6f649cc57c85e66"
+    },
+    "yaroker2013opm": {
+      "title": "An OPM Conceptual Model-Based Executable Simulation Environment: Implementation and Evaluation",
+      "address": "https://doi.org/10.1002/sys.21235",
+      "bibliography_entry": "yaroker2013opm",
+      "entry_sha256": "8fc7a3d206909dc6a8eb4fcd8af196d845a1853f0c50cbaff1b84bf48ea527d9"
+    },
+    "dori2003opcat": {
+      "title": "OPCAT\u2014A Bimodal CASE Tool for Object-Process Based System Development",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L405",
+      "bibliography_entry": "dori2003opcat",
+      "entry_sha256": "5a192b5a1157fcfa2c7a0e2feed1cdbed6ce41fc4afd28b4fbfef79a240fc9c6"
+    },
+    "zheng2022executable": {
+      "title": "Executable Knowledge Graphs for Machine Learning: A Bosch Case of Welding Monitoring",
+      "address": "https://doi.org/10.1007/978-3-031-19433-7_45",
+      "bibliography_entry": "zheng2022executable",
+      "entry_sha256": "004d897786f0bd7a3bebbeeead1f61e39344a7fc4c89f38b1bc7e4a8f25d64f7"
+    },
+    "bian2025llm": {
+      "title": "LLM-Empowered Knowledge Graph Construction: A Survey",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L121",
+      "bibliography_entry": "bian2025llm",
+      "entry_sha256": "2c1799a900719f5154eb83678fab428ce0eb89660f661fe6a2c5e591ca5c1aa1"
+    },
+    "pan2024unifying": {
+      "title": "Unifying Large Language Models and Knowledge Graphs: A Roadmap",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L129",
+      "bibliography_entry": "pan2024unifying",
+      "entry_sha256": "59e76fb3f4971b8b0715c869baf782c227aa01a47868d2b0aae7bfa3d9137ae6"
+    },
+    "jsonld2020": {
+      "title": "JSON-LD 1.1",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L157",
+      "bibliography_entry": "jsonld2020",
+      "entry_sha256": "80c70bfc8f9aec93f3badc7ad0158051dda5cd08c56d0d1bdc84140ac48802e5"
+    },
+    "neo4j": {
+      "title": "The Neo4j Graph Database",
+      "address": "https://neo4j.com",
+      "bibliography_entry": "neo4j",
+      "entry_sha256": "5a87998762e16ecf3d51763b215f49099f8753458e71571a204174ac3a5725b9"
+    },
+    "mcp2025": {
+      "title": "Model Context Protocol Specification",
+      "address": "https://modelcontextprotocol.io/specification/2025-11-25",
+      "bibliography_entry": "mcp2025",
+      "entry_sha256": "c187d52e8c0fee4b3c41000fe7aa62c7adbbb5735b2ffd8795d66fb3aaf5f89c"
+    },
+    "langgraph2024": {
+      "title": "LangGraph: Build Stateful, Multi-Actor Applications with LLMs",
+      "address": "https://github.com/langchain-ai/langgraph",
+      "bibliography_entry": "langgraph2024",
+      "entry_sha256": "dcdf9712fb0f32cd884b810470ed78cd220dd7990aed75e6b491aaf9a4d9d06b"
+    },
+    "wu2023autogen": {
+      "title": "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L357",
+      "bibliography_entry": "wu2023autogen",
+      "entry_sha256": "60feffc1eb147617a76adc95411cc2e8168cf9f5813209ba63e67e0c9594294d"
+    },
+    "crewai2023": {
+      "title": "CrewAI: Framework for Orchestrating Role-Playing, Autonomous AI Agents",
+      "address": "https://github.com/crewAIInc/crewAI",
+      "bibliography_entry": "crewai2023",
+      "entry_sha256": "968b94c35f5e5d9759ea8f6a0b77c55b8e9d6092d751148e97bfdcd55008f6e6"
+    },
+    "khattab2024dspy": {
+      "title": "DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L378",
+      "bibliography_entry": "khattab2024dspy",
+      "entry_sha256": "119e1fd6fce68a2c58d546db8c972f567024bcf11509fd96805a805ca8583811"
+    },
+    "willard2023efficient": {
+      "title": "Efficient Guided Generation for Large Language Models",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L181",
+      "bibliography_entry": "willard2023efficient",
+      "entry_sha256": "fbc17ada5a02fdeadcd84e51738917aadd8dd8307afa6bc3a6d38eeb4fc23e0c"
+    },
+    "tam2025slot": {
+      "title": "SLOT: Structuring the Output of Large Language Models",
+      "address": "https://github.com/TRUGS-LLC/TRUGS/blob/37bb78c781adba7fa6a759e4688feb1b2e29c604/PAPER/trugs.bib#L189",
+      "bibliography_entry": "tam2025slot",
+      "entry_sha256": "d88613f6217281d16e890dfab0cd1b07b9a51567567853db894def1ae624f9fb"
+    }
+  }
+}

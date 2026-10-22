@@ -1,278 +1,268 @@
 {
-  "name": "TRUGS-WEB Folder",
-  "version": "2.0.0",
+  "name": "trugs-web architecture",
+  "version": "2.1.0",
   "type": "PROJECT",
-  "description": "TRUGS web research tool \u2014 crawl web sources and build passive TRUGS knowledge graphs. One-way and passive: it builds graphs, it never closes the self-developing loop. Single `trugs-web` binary. Apache-2.0.",
+  "dimension": "system",
   "dimensions": {
-    "folder_structure": {
-      "description": "Folder contents and their relationships",
-      "base_level": "BASE"
+    "system": {
+      "description": "Package modules and examples"
     }
-  },
-  "capabilities": {
-    "extensions": [],
-    "vocabularies": [
-      "project_v1"
-    ],
-    "profiles": []
   },
   "nodes": [
     {
-      "id": "trugs_web_folder",
-      "type": "FOLDER",
+      "id": "web",
+      "type": "MODULE",
       "properties": {
-        "name": "TRUGS-WEB",
-        "purpose": "Root folder for TRUGS-WEB",
-        "phase": "ACTIVE",
-        "status": "ACTIVE"
+        "name": "trugs-web",
+        "description": "Describe folders and query graphs offline; crawl web sources with consent.",
+        "path": "."
       },
       "parent_id": null,
       "contains": [
-        "agent_md",
-        "architecture_md",
-        "changelog_md",
-        "claude_md",
-        "license",
-        "notice",
-        "readme_md",
-        "deferred_phase2",
-        "example_trug_json",
-        "pyproject_toml",
-        "src",
-        "tests"
+        "entry_0",
+        "entry_1",
+        "entry_2",
+        "entry_3",
+        "entry_4",
+        "entry_5",
+        "entry_16"
       ],
-      "metric_level": "KILO_FOLDER",
-      "dimension": "folder_structure"
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
     },
     {
-      "id": "agent_md",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "AGENT.md",
-        "purpose": "File: AGENT.md"
-      },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "architecture_md",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "ARCHITECTURE.md",
-        "purpose": "File: ARCHITECTURE.md"
-      },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "changelog_md",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "CHANGELOG.md",
-        "purpose": "File: CHANGELOG.md"
-      },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "claude_md",
-      "type": "DOCUMENT",
-      "properties": {
-        "name": "CLAUDE.md",
-        "purpose": "File: CLAUDE.md"
-      },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "license",
-      "type": "COMPONENT",
-      "properties": {
-        "name": "LICENSE",
-        "purpose": "File: LICENSE"
-      },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "DEKA_COMPONENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "notice",
-      "type": "COMPONENT",
-      "properties": {
-        "name": "NOTICE",
-        "purpose": "File: NOTICE"
-      },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "DEKA_COMPONENT",
-      "dimension": "folder_structure"
-    },
-    {
-      "id": "readme_md",
-      "type": "DOCUMENT",
+      "id": "entry_0",
+      "type": "FILE",
       "properties": {
         "name": "README.md",
-        "purpose": "File: README.md"
+        "path": "README.md",
+        "description": "README.md"
       },
-      "parent_id": "trugs_web_folder",
+      "parent_id": "web",
       "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
     },
     {
-      "id": "deferred_phase2",
-      "type": "FOLDER",
+      "id": "entry_1",
+      "type": "MODULE",
       "properties": {
-        "name": "deferred_phase2",
-        "purpose": "Directory: deferred_phase2"
+        "name": "SPEC",
+        "path": "SPEC",
+        "description": "Draft hub format; proposed services are not implemented."
       },
-      "parent_id": "trugs_web_folder",
+      "parent_id": "web",
       "contains": [],
-      "metric_level": "KILO_FOLDER",
-      "dimension": "folder_structure"
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
     },
     {
-      "id": "example_trug_json",
-      "type": "SPECIFICATION",
+      "id": "entry_2",
+      "type": "MODULE",
       "properties": {
-        "name": "example.trug.json",
-        "purpose": "File: example.trug.json"
+        "name": "examples",
+        "path": "examples",
+        "description": "examples"
       },
-      "parent_id": "trugs_web_folder",
+      "parent_id": "web",
       "contains": [],
-      "metric_level": "BASE_SPECIFICATION",
-      "dimension": "folder_structure"
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
     },
     {
-      "id": "pyproject_toml",
-      "type": "DOCUMENT",
+      "id": "entry_3",
+      "type": "MODULE",
       "properties": {
-        "name": "pyproject.toml",
-        "purpose": "File: pyproject.toml"
+        "name": "hubs",
+        "path": "hubs",
+        "description": "Unsigned semantic and executable graph sample."
       },
-      "parent_id": "trugs_web_folder",
+      "parent_id": "web",
       "contains": [],
-      "metric_level": "BASE_DOCUMENT",
-      "dimension": "folder_structure"
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
     },
     {
-      "id": "src",
-      "type": "FOLDER",
+      "id": "entry_4",
+      "type": "MODULE",
+      "properties": {
+        "name": "schema",
+        "path": "schema",
+        "description": "schema"
+      },
+      "parent_id": "web",
+      "contains": [],
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_5",
+      "type": "MODULE",
       "properties": {
         "name": "src",
-        "purpose": "Directory: src"
+        "path": "src",
+        "description": "src"
       },
-      "parent_id": "trugs_web_folder",
-      "contains": [],
-      "metric_level": "KILO_FOLDER",
-      "dimension": "folder_structure"
+      "parent_id": "web",
+      "contains": [
+        "entry_6"
+      ],
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
     },
     {
-      "id": "tests",
-      "type": "FOLDER",
+      "id": "entry_6",
+      "type": "MODULE",
+      "properties": {
+        "name": "trugs_web",
+        "path": "src/trugs_web",
+        "description": "src/trugs_web"
+      },
+      "parent_id": "entry_5",
+      "contains": [
+        "entry_7",
+        "entry_8",
+        "entry_9",
+        "entry_10",
+        "entry_11",
+        "entry_12",
+        "entry_13",
+        "entry_14",
+        "entry_15"
+      ],
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_7",
+      "type": "FILE",
+      "properties": {
+        "name": "map.py",
+        "path": "src/trugs_web/map.py",
+        "description": "Deterministic folders, links and local imports."
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_8",
+      "type": "FILE",
+      "properties": {
+        "name": "cli.py",
+        "path": "src/trugs_web/cli.py",
+        "description": "Map, query, demo and consent before web requests."
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_9",
+      "type": "FILE",
+      "properties": {
+        "name": "crawler.py",
+        "path": "src/trugs_web/crawler.py",
+        "description": "Scoped HTTP discovery, robots rules and bounded redirects."
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_10",
+      "type": "FILE",
+      "properties": {
+        "name": "graph_builder.py",
+        "path": "src/trugs_web/graph_builder.py",
+        "description": "src/trugs_web/graph_builder.py"
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_11",
+      "type": "FILE",
+      "properties": {
+        "name": "extractor.py",
+        "path": "src/trugs_web/extractor.py",
+        "description": "src/trugs_web/extractor.py"
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_12",
+      "type": "FILE",
+      "properties": {
+        "name": "resolver.py",
+        "path": "src/trugs_web/resolver.py",
+        "description": "src/trugs_web/resolver.py"
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_13",
+      "type": "FILE",
+      "properties": {
+        "name": "credibility.py",
+        "path": "src/trugs_web/credibility.py",
+        "description": "src/trugs_web/credibility.py"
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_FILE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_14",
+      "type": "MODULE",
+      "properties": {
+        "name": "query",
+        "path": "src/trugs_web/query",
+        "description": "Existing loader and traversal, with JSON and text output."
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_15",
+      "type": "MODULE",
+      "properties": {
+        "name": "weight",
+        "path": "src/trugs_web/weight",
+        "description": "Existing topology and freshness helpers."
+      },
+      "parent_id": "entry_6",
+      "contains": [],
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
+    },
+    {
+      "id": "entry_16",
+      "type": "MODULE",
       "properties": {
         "name": "tests",
-        "purpose": "Directory: tests"
+        "path": "tests",
+        "description": "tests"
       },
-      "parent_id": "trugs_web_folder",
+      "parent_id": "web",
       "contains": [],
-      "metric_level": "KILO_FOLDER",
-      "dimension": "folder_structure"
+      "metric_level": "BASE_MODULE",
+      "dimension": "system"
     }
   ],
-  "edges": [
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "agent_md",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "architecture_md",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "changelog_md",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "claude_md",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "license",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "notice",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "readme_md",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "deferred_phase2",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "example_trug_json",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "pyproject_toml",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "src",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    },
-    {
-      "from_id": "trugs_web_folder",
-      "to_id": "tests",
-      "relation": "contains",
-      "weight": 1.0,
-      "properties": {}
-    }
-  ]
+  "edges": []
 }
