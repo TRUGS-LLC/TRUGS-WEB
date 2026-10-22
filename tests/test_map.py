@@ -173,3 +173,57 @@ def test_output_cannot_become_its_own_input(folder, capsys):
 
     assert main(["map", str(folder), "--out", str(folder / "map.trug.json")]) == 1
     assert "outside" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "[[:digit:]].txt",
+        *[
+            f"[[:{name}:]].txt"
+            for name in (
+                "alnum",
+                "alpha",
+                "blank",
+                "cntrl",
+                "graph",
+                "lower",
+                "print",
+                "punct",
+                "space",
+                "upper",
+                "xdigit",
+            )
+        ],
+        "[![:digit:]].txt",
+        "[^[:digit:]].txt",
+        "[a-c[:digit:]_].txt",
+        "[[:upper:][:digit:]].txt",
+        "[][:digit:]].txt",
+        "[[:digit:]-].txt",
+        r"[\[[:digit:]\]].txt",
+        "[!a-c].txt",
+        "[^a-c].txt",
+        "[é].txt",
+    ],
+)
+def test_gitignore_character_classes_match_git(pattern, tmp_path):
+    root = tmp_path / "classes"
+    root.mkdir()
+    (root / ".gitignore").write_text(pattern + "\n")
+    paths = [chr(char) + ".txt" for char in range(1, 128) if chr(char) != "/"]
+    paths += ["é.txt", "٣.txt", "😀.txt"]
+    for path in paths:
+        (root / path).write_text("character class fixture")
+    subprocess.run(["git", "init", "-q", str(root)], check=True)
+    result = subprocess.run(
+        ["git", "-C", str(root), "check-ignore", "--no-index", "-z", "--stdin"],
+        input=("\0".join("./" + path for path in paths) + "\0").encode(),
+        capture_output=True,
+    )
+    assert result.returncode in {0, 1}, result.stderr
+    ignored = {path[2:] for path in result.stdout.decode().split("\0") if path}
+    actual = set(by_path(map_folder(root, include_hidden=True))) - {".", ".gitignore"}
+    assert actual == set(paths) - ignored
+    if pattern == "[[:digit:]].txt":
+        assert "1.txt" in ignored and "a.txt" not in ignored

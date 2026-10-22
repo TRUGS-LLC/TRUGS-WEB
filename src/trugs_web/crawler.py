@@ -272,8 +272,9 @@ class SourceDiscoverer:
                 content_val = meta_desc.get("content", "")
                 description = content_val if isinstance(content_val, str) else ""
 
-            content = self._extract_content(soup)
+            # Content filtering removes navigation elements, so discover their links first.
             links = self._extract_links(soup, str(response.url))
+            content = self._extract_content(soup)
             source_type = self._classify_source(url, soup)
 
             return Source(

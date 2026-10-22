@@ -19,6 +19,58 @@ JS_IMPORT = re.compile(
 )
 
 
+# Git's named classes use ASCII character ranges, independent of Python's Unicode classes.
+_POSIX_CLASSES = {
+    "alnum": "a-zA-Z0-9",
+    "alpha": "a-zA-Z",
+    "blank": r" \t",
+    "cntrl": r"\x00-\x1f\x7f",
+    "digit": "0-9",
+    "graph": r"\x21-\x7e",
+    "lower": "a-z",
+    "print": r"\x20-\x7e",
+    "punct": r"\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e",
+    "space": r" \t\r\n",
+    "upper": "A-Z",
+    "xdigit": "a-fA-F0-9",
+}
+
+
+def _bracket_class(pattern: str, start: int) -> tuple[str, int]:
+    """Consume a whole bracket expression, including nested POSIX class tokens."""
+    i = start + 1
+    negate = i < len(pattern) and pattern[i] in "!^"
+    if negate:
+        i += 1
+    first = i
+    group = ""
+    while i < len(pattern):
+        char = pattern[i]
+        if char == "]" and i != first:
+            # Even negated classes cannot cross a path separator.
+            return "(?!/)[" + ("^" if negate else "") + group + "]", i
+        if char == "\\" and i + 1 < len(pattern):
+            i += 1
+            group += re.escape(pattern[i])
+        elif pattern.startswith("[:", i):
+            end = pattern.find(":]", i + 2)
+            if end >= 0:
+                name = pattern[i + 2 : end]
+                if name not in _POSIX_CLASSES:
+                    # Git rejects unknown named classes rather than matching them literally.
+                    return "(?!)", end + 1
+                group += _POSIX_CLASSES[name]
+                i = end + 1
+            else:
+                group += r"\["
+        elif char == "-":
+            group += "-"
+        else:
+            group += re.escape(char)
+        i += 1
+    return r"\[", start
+
+
 def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -54,22 +106,8 @@ def _wildmatch(pattern: str) -> str:
         elif char == "?":
             result += "[^/]"
         elif char == "[":
-            end = i + 1
-            if end < len(pattern) and pattern[end] in "!^":
-                end += 1
-            if end < len(pattern) and pattern[end] == "]":
-                end += 1
-            end = pattern.find("]", end)
-            if end < 0:
-                result += r"\["
-            else:
-                group = pattern[i + 1 : end]
-                if group.startswith("!"):
-                    group = "^" + group[1:]
-                elif group.startswith("^"):
-                    group = "\\" + group
-                result += "[" + group.replace("\\", "\\\\") + "]"
-                i = end
+            group, i = _bracket_class(pattern, i)
+            result += group
         else:
             result += re.escape(char)
         i += 1
@@ -79,7 +117,9 @@ def _wildmatch(pattern: str) -> str:
 class IgnoreRules:
     """Rules are inherited by a directory; ignored parents are never traversed."""
 
-    def __init__(self, rules: list[tuple[str, re.Pattern, bool, bool]] | None = None):
+    def __init__(
+        self, rules: list[tuple[str, re.Pattern[bytes], bool, bool]] | None = None
+    ):
         self.rules = list(rules or [])
 
     def extend(self, directory: Path, relative: str) -> IgnoreRules:
@@ -105,7 +145,8 @@ class IgnoreRules:
                     result.rules.append(
                         (
                             relative,
-                            re.compile(prefix + _wildmatch(line) + "$"),
+                            # Git matches filesystem bytes, including in negated classes.
+                            re.compile(os.fsencode(prefix + _wildmatch(line) + "$")),
                             negate,
                             directory_only,
                         )
@@ -117,7 +158,7 @@ class IgnoreRules:
         for base, pattern, negate, directory_only in self.rules:
             prefix = "" if base == "." else base + "/"
             if path.startswith(prefix) and (is_dir or not directory_only):
-                if pattern.fullmatch(path[len(prefix) :]):
+                if pattern.fullmatch(os.fsencode(path[len(prefix) :])):
                     ignored = not negate
         return ignored
 
