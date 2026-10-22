@@ -37,21 +37,40 @@ _POSIX_CLASSES = {
 
 
 def _bracket_class(pattern: str, start: int) -> tuple[str, int]:
-    """Consume a whole bracket expression, including nested POSIX class tokens."""
+    """Parse byte members before emitting regex: Git also accepts descending ranges."""
     i = start + 1
     negate = i < len(pattern) and pattern[i] in "!^"
     if negate:
         i += 1
     first = i
-    group = ""
+    members: set[int] = set()
+    previous: int | None = None
     while i < len(pattern):
         char = pattern[i]
         if char == "]" and i != first:
-            # Even negated classes cannot cross a path separator.
-            return "(?!/)[" + ("^" if negate else "") + group + "]", i
+            if negate:
+                members = set(range(256)) - members
+            members.discard(ord("/"))
+            group = "".join(r"\x%02x" % byte for byte in sorted(members))
+            return ("[" + group + "]" if group else "(?!)"), i
         if char == "\\" and i + 1 < len(pattern):
             i += 1
-            group += re.escape(pattern[i])
+            previous = ord(pattern[i])
+            members.add(previous)
+        elif (
+            char == "-"
+            and previous is not None
+            and i + 1 < len(pattern)
+            and pattern[i + 1] != "]"
+        ):
+            i += 1
+            if pattern[i] == "\\":
+                i += 1
+                if i == len(pattern):
+                    return "(?!)", i - 1
+            # The preceding literal remains a member even if this range is descending.
+            members.update(range(previous, ord(pattern[i]) + 1))
+            previous = None
         elif pattern.startswith("[:", i):
             end = pattern.find(":]", i + 2)
             if end >= 0:
@@ -59,16 +78,22 @@ def _bracket_class(pattern: str, start: int) -> tuple[str, int]:
                 if name not in _POSIX_CLASSES:
                     # Git rejects unknown named classes rather than matching them literally.
                     return "(?!)", end + 1
-                group += _POSIX_CLASSES[name]
+                members.update(
+                    byte
+                    for byte in range(256)
+                    if re.fullmatch("[" + _POSIX_CLASSES[name] + "]", chr(byte))
+                )
+                previous = None
                 i = end + 1
             else:
-                group += r"\["
-        elif char == "-":
-            group += "-"
+                previous = ord(char)
+                members.add(previous)
         else:
-            group += re.escape(char)
+            previous = ord(char)
+            members.add(previous)
         i += 1
-    return r"\[", start
+    # An unterminated bracket expression never matches in Git.
+    return "(?!)", len(pattern) - 1
 
 
 def _digest(data: bytes) -> str:
@@ -79,14 +104,18 @@ def _id(kind: str, value: str) -> str:
     return kind.lower() + "_" + _digest(value.encode())
 
 
-def _wildmatch(pattern: str) -> str:
+def _wildmatch(raw: bytes) -> bytes:
     """Git's slash-aware glob patterns, translated using only the standard library."""
+    pattern = raw.decode("latin1")
     result = ""
     i = 0
     while i < len(pattern):
         char = pattern[i]
-        if char == "\\" and i + 1 < len(pattern):
+        if char == "\\":
             i += 1
+            if i == len(pattern):
+                result += "(?!)"
+                break
             result += re.escape(pattern[i])
         elif char == "*":
             end = i
@@ -95,11 +124,20 @@ def _wildmatch(pattern: str) -> str:
             recursive = (
                 end - i >= 2
                 and (i == 0 or pattern[i - 1] == "/")
-                and (end == len(pattern) or pattern[end] == "/")
+                and (
+                    end == len(pattern)
+                    or pattern[end] == "/"
+                    or pattern.startswith(r"\/", end)
+                )
             )
             if recursive and end < len(pattern):
-                result += "(?:[^/]+/)*"
-                end += 1
+                # An escaped separator permits crossing slashes but still consumes one.
+                if pattern[end] == "\\":
+                    result += ".*/"
+                    end += 2
+                else:
+                    result += "(?:[^/]+/)*"
+                    end += 1
             else:
                 result += ".*" if recursive else "[^/]*"
             i = end - 1
@@ -111,7 +149,108 @@ def _wildmatch(pattern: str) -> str:
         else:
             result += re.escape(char)
         i += 1
-    return result
+    return result.encode("latin1")
+
+
+def _ignore_line(raw: bytes) -> bytes:
+    """Keep escaped spaces; discard only the unescaped trailing spaces."""
+    end = 0
+    i = 0
+    while i < len(raw):
+        if raw[i] == ord("\\") and i + 1 < len(raw):
+            i += 2
+            end = i
+        else:
+            if raw[i] != ord(" "):
+                end = i + 1
+            i += 1
+    return raw[:end]
+
+
+def _markdown_title(text: str) -> str | None:
+    """First ATX or setext heading outside fenced or four-column-indented code."""
+    fence = ""
+    fence_length = 0
+    fence_quotes = 0
+    fence_indent = 0
+    quote_depth = 0
+    list_indents: list[int] = []
+    paragraph: list[str] = []
+    for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+        line = line.expandtabs(4)
+        if fence:
+            content = line
+            in_container = True
+            for _ in range(fence_quotes):
+                quote = re.match(r" {0,3}> ?", content)
+                if not quote:
+                    in_container = False
+                    break
+                content = content[quote.end() :]
+            if (
+                content.strip()
+                and len(content) - len(content.lstrip(" ")) < fence_indent
+            ):
+                in_container = False
+            if in_container:
+                content = content[fence_indent:]
+                if re.fullmatch(
+                    r" {0,3}" + fence + "{" + str(fence_length) + r",}[ \t]*", content
+                ):
+                    fence = ""
+                continue
+            # Leaving a list or quote ends its unclosed fenced block too.
+            fence = ""
+            paragraph = []
+        quotes = 0
+        while quote := re.match(r" {0,3}> ?", line):
+            quotes += 1
+            line = line[quote.end() :]
+        if quotes != quote_depth:
+            paragraph = []
+            list_indents = []
+        quote_depth = quotes
+        indent = len(line) - len(line.lstrip(" "))
+        if line.strip():
+            while list_indents and indent < list_indents[-1]:
+                list_indents.pop()
+        consumed = list_indents[-1] if list_indents else 0
+        line = line[consumed:]
+        while item := re.match(r" {0,3}(?:[-+*]|\d{1,9}[.)])( +|$)", line):
+            # More than four spaces after a marker leave indented code in the item.
+            width = (
+                item.end() - max(0, len(item[1]) - 1)
+                if len(item[1]) > 4
+                else item.end()
+            )
+            consumed += width
+            list_indents.append(consumed)
+            paragraph = []
+            line = line[width:]
+        opening = re.match(r" {0,3}(`{3,}|~{3,})(.*)$", line)
+        if opening and (opening[1][0] == "~" or "`" not in opening[2]):
+            fence = opening[1][0]
+            fence_length = len(opening[1])
+            fence_quotes = quote_depth
+            fence_indent = consumed
+            paragraph = []
+            continue
+        if not line.strip() or line.startswith("    "):
+            paragraph = []
+            continue
+        atx = re.match(r" {0,3}#{1,6}(?:[ \t]+(.*)|$)", line)
+        if atx:
+            return re.sub(r"(?:^|[ \t]+)#+[ \t]*$", "", atx[1] or "").strip()
+        if paragraph and re.fullmatch(r" {0,3}(?:=+|-+)[ \t]*", line):
+            return " ".join(paragraph)
+        # A thematic break or another block cannot supply a setext title.
+        if re.match(r" {0,3}(?:>|[-+*][ \t]|\d+[.)][ \t])", line) or re.fullmatch(
+            r" {0,3}(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,}|=+)", line
+        ):
+            paragraph = []
+        else:
+            paragraph.append(line.strip())
+    return None
 
 
 class IgnoreRules:
@@ -126,27 +265,26 @@ class IgnoreRules:
         result = IgnoreRules(self.rules)
         ignore = directory / ".gitignore"
         if ignore.is_file() and not ignore.is_symlink():
-            for raw in ignore.read_text(
-                encoding="utf-8", errors="replace"
-            ).splitlines():
-                line = re.sub(r"(?<!\\) +$", "", raw)
-                if not line or line.startswith("#"):
+            for raw in ignore.read_bytes().removeprefix(b"\xef\xbb\xbf").split(b"\n"):
+                line = _ignore_line(raw.removesuffix(b"\r"))
+                if not line or line.startswith(b"#"):
                     continue
-                negate = line.startswith("!")
+                negate = line.startswith(b"!")
                 if negate:
                     line = line[1:]
-                directory_only = line.endswith("/")
-                line = line.rstrip("/")
-                anchored = "/" in line
-                line = line.lstrip("/")
+                directory_only = line.endswith(b"/")
+                if directory_only:
+                    line = line[:-1]
+                anchored = b"/" in line
+                line = line.removeprefix(b"/")
                 # Escaped leading #/! and spaces are literal characters.
                 if line:
-                    prefix = "" if anchored else "(?:.*/)?"
+                    prefix = b"" if anchored else b"(?:.*/)?"
                     result.rules.append(
                         (
                             relative,
                             # Git matches filesystem bytes, including in negated classes.
-                            re.compile(os.fsencode(prefix + _wildmatch(line) + "$")),
+                            re.compile(prefix + _wildmatch(line), re.DOTALL),
                             negate,
                             directory_only,
                         )
@@ -393,9 +531,9 @@ def map_folder(folder: str | Path, *, include_hidden: bool = False) -> dict:
         props = nodes[path]["properties"]
         kind = props["kind"]
         if kind in {"md", "markdown"}:
-            title = re.search(r"^ {0,3}#{1,6}\s+(.+?)\s*#*\s*$", text, re.M)
-            if title:
-                props["title"] = title.group(1)
+            title = _markdown_title(text)
+            if title is not None:
+                props["title"] = title
             for match in re.finditer(
                 r"!?\[[^\]]*\]\(\s*(<[^>]*>|[^\s)]+)(?:\s+[^)]*)?\)|^ {0,3}\[[^\]]+\]:\s*(<[^>]*>|\S+)",
                 text,

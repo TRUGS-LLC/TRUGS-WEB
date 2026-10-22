@@ -65,7 +65,13 @@ are not traversed. No global ignore file or repository-local exclude file is rea
 Paths are relative to the input root. Files carry extension, byte length and
 SHA-256; folders carry the total included byte length and a digest of the sorted
 child names, kinds and digests. No time or absolute root path is recorded.
-Markdown's first heading and HTML's title are recorded. Markdown inline and
+Markdown's first ATX heading (`#` through `######`, followed by whitespace or
+end of line) or setext heading (text underlined with `=` or `-`) is recorded.
+Headings may have up to three leading spaces. Four-column indentation, including
+tabs, is code; headings inside it or backtick/tilde code fences are skipped.
+List and blockquote prefixes are handled before these checks.
+Fences have at least three matching markers and close with at least the opening
+length. HTML's title is also recorded. Markdown inline and
 reference links and HTML `href`/`src` produce references. Addresses leaving the
 folder are recorded without being fetched. Missing local targets have
 `missing: true`. Existing excluded targets stay excluded. Symlinks are recorded
