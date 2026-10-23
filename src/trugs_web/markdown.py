@@ -302,8 +302,14 @@ def _links(text: str) -> list[str]:
             if token:
                 i += token.end()
                 continue
+        # Recognize image openers while scanning, after escape/code/HTML handling.
+        # A raw preceding ! may have been consumed as an escaped literal.
+        if char == "!" and text[i + 1 : i + 2] == "[":
+            brackets.append((True, True, len(links)))
+            i += 2
+            continue
         if char == "[":
-            brackets.append((i > 0 and text[i - 1] == "!", True, len(links)))
+            brackets.append((False, True, len(links)))
         elif char == "]" and brackets:
             image, active, nested = brackets.pop()
             target = (

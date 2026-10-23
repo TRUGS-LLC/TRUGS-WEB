@@ -1,7 +1,9 @@
 """Compare generated Markdown folder metadata with CommonMark tokens."""
 
 from itertools import product
+import posixpath
 import random
+import string
 from urllib.parse import unquote, urlsplit
 
 from markdown_it import MarkdownIt
@@ -197,7 +199,36 @@ def markdown_cases():
             )
 
 
-CASES = list(markdown_cases())
+def punctuation_escape_cases():
+    """Compose escapes with every character boundary of link/image syntax."""
+    yield "escape-image-marker", "# Example\n[\\![inner](real.md)](absent.md)\n"
+    titles = ("", ' "title"', " 'title'", " (title)")
+    templates = []
+    for image, target, title in product(("", "!"), ("after.md", "<after.md>"), titles):
+        templates.append(f"{image}[label]({target}{title})")
+    for outer, inner, title in product(("", "!"), ("", "!"), titles):
+        templates.append(f"{outer}[{inner}[inner](after.md{title})](absent.md{title})")
+    for n, template in enumerate(templates):
+        # All 32 ASCII punctuation escapes, before/inside/after every opener,
+        # label, closer, bare/angle destination and quoted/parenthesized title.
+        # Nested templates exercise all four link/image combinations as well.
+        for char, position in product(string.punctuation, range(len(template) + 1)):
+            source = template[:position] + "\\" + char + template[position:]
+            yield f"escape-insert-{n}-{ord(char)}-{position}", source + "\n\n# Actual\n"
+        for position, char in enumerate(template):
+            if char not in string.punctuation:
+                continue
+            # Escape the delimiter itself, including odd/even runs of literal
+            # backslashes, rather than only adding a literal beside a delimiter.
+            for count in range(6):
+                source = template[:position] + "\\" * count + template[position:]
+                yield (
+                    f"escape-delimiter-{n}-{position}-{count}",
+                    source + "\n\n# Actual\n",
+                )
+
+
+CASES = list(markdown_cases()) + list(punctuation_escape_cases())
 
 
 @pytest.mark.parametrize(("case", "source"), CASES, ids=[case for case, _ in CASES])
@@ -214,6 +245,7 @@ def test_generated_markdown_matches_commonmark(case, source, tmp_path):
         "a&b.md",
         "a b.md",
         "after.md",
+        "real.md",
     ):
         (tmp_path / name).write_text("")
     (tmp_path / "README.md").write_text(source)
@@ -227,28 +259,16 @@ def test_generated_markdown_matches_commonmark(case, source, tmp_path):
         if edge["relation"] == "REFERENCES"
     }
     expected = set()
+    expected_missing = set()
     for address in expected_links:
         parts = urlsplit(address)
-        expected.add(
-            address
-            if parts.scheme or parts.netloc
-            else unquote(parts.path) or "README.md"
-        )
+        if parts.scheme or parts.netloc or parts.path.startswith("/"):
+            expected.add(address)
+            continue
+        path = posixpath.normpath(unquote(parts.path)) if parts.path else "README.md"
+        expected.add(path)
+        if not (tmp_path / path).exists():
+            expected_missing.add(path)
     assert actual == expected
     missing = {p["path"] for p in props.values() if p.get("missing")}
-    assert missing == {
-        p
-        for p in expected
-        if p
-        not in {
-            "README.md",
-            "guide(v2).md",
-            "deep(v2(a)).md",
-            "space name.md",
-            "café.md",
-            "a&b.md",
-            "a b.md",
-            "after.md",
-        }
-        and not urlsplit(p).scheme
-    }
+    assert missing == expected_missing
