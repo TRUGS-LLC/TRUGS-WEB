@@ -1,4 +1,4 @@
-"""CLI smoke tests — covers SC-5 (cli exposes help) + the query/synthesize verbs."""
+"""CLI smoke tests — covers help output and the query/synthesize verbs."""
 
 import pytest
 
@@ -20,7 +20,7 @@ def test_help_exits_zero(capsys):
 
 @pytest.mark.parametrize("verb", ["crawl", "build", "query", "synthesize"])
 def test_each_verb_has_help(verb):
-    # SC-5: every verb exposes --help (argparse raises SystemExit(0) on --help)
+    # Every verb exposes --help (argparse raises SystemExit(0) on --help)
     parser = build_parser()
     with pytest.raises(SystemExit) as ei:
         parser.parse_args([verb, "--help"])

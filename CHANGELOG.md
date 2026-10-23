@@ -143,7 +143,7 @@ pytest tests/ -v
 pytest tests/ -m graph_validation_e2e  # validate against trugs_tools.validator
 ```
 
-## Deferred to Phase 2
+## Deferred features
 
 Hub federation and graph refresh are scaffolded in `deferred_phase2/` but not shipped in v1:
 
@@ -230,7 +230,7 @@ Correction, 2026-10-16: LICENSE is Apache-2.0 and NOTICE now carries attribution
 and commercial-licensing pointers above do not describe the current NOTICE. See README [Scope](README.md#scope)
 for what this software includes.
 
-### Deferred to Phase 2
+### Deferred features
 
 Hub federation and graph refresh are scaffolded in `deferred_phase2/` but not shipped in v1. These will ship in
 `2.1.0`:
@@ -241,7 +241,6 @@ Hub federation and graph refresh are scaffolded in `deferred_phase2/` but not sh
 ### Note
 
 The `trugs-tools` / `trugs-store` 2.0.0 final commons are now on PyPI, and the clean-venv
-install gate (SC-1) is verified green against them (270 tests pass from the built wheel;
+installation is verified against them (270 tests pass from the built wheel;
 `trugs_tools.validator.validate_trug` resolves from the published 2.0.0). `trugs-web` itself is
-**not yet published** — the PyPI publish + public repo graduation is a separate,
-explicit step pending HITM go.
+**not yet published** — publication is a separate step awaiting approval.

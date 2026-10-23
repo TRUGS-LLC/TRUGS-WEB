@@ -279,7 +279,9 @@ def _inline_target(text: str, start: int) -> tuple[str, int] | None:
 def _links(text: str) -> list[str]:
     """Scan brackets while excluding escapes, code spans, and inline HTML tokens."""
     links: list[str] = []
-    brackets: list[tuple[bool, bool, int]] = []  # image, active, first nested link
+    # Image openers remember enclosing eligibility: their alt content is parsed
+    # separately from surrounding links and cannot deactivate those links.
+    brackets: list[tuple[bool, bool, int, tuple[bool, ...]]] = []
     i = 0
     while i < len(text):
         char = text[i]
@@ -305,13 +307,13 @@ def _links(text: str) -> list[str]:
         # Recognize image openers while scanning, after escape/code/HTML handling.
         # A raw preceding ! may have been consumed as an escaped literal.
         if char == "!" and text[i + 1 : i + 2] == "[":
-            brackets.append((True, True, len(links)))
+            brackets.append((True, True, len(links), tuple(b[1] for b in brackets)))
             i += 2
             continue
         if char == "[":
-            brackets.append((False, True, len(links)))
+            brackets.append((False, True, len(links), ()))
         elif char == "]" and brackets:
-            image, active, nested = brackets.pop()
+            image, active, nested, enclosing = brackets.pop()
             target = (
                 _inline_target(text, i + 2)
                 if active and text[i + 1 : i + 2] == "("
@@ -321,10 +323,15 @@ def _links(text: str) -> list[str]:
                 address, i = target
                 if image:
                     del links[nested:]
+                    brackets = [
+                        (img, flag, index, saved)
+                        for (img, _, index, saved), flag in zip(brackets, enclosing)
+                    ]
                 links.append(address)
                 if not image:
                     brackets = [
-                        (img, flag and img, index) for img, flag, index in brackets
+                        (img, flag and img, index, saved)
+                        for img, flag, index, saved in brackets
                     ]
                 continue
         i += 1

@@ -228,7 +228,50 @@ def punctuation_escape_cases():
                 )
 
 
-CASES = list(markdown_cases()) + list(punctuation_escape_cases())
+def nested_link_image_cases():
+    """Compose links and images through two nested label levels."""
+    yield (
+        "linked-image-with-link-alt",
+        "# Example\n[![image [inner](real.md)](image.png)](guide.md)\n",
+    )
+    titles = ("", ' "title"', " 'title'", " (title)")
+    for n, (markers, angles, target_titles) in enumerate(
+        product(
+            product(("", "!"), repeat=3),
+            product((False, True), repeat=3),
+            product(titles, repeat=3),
+        )
+    ):
+        source = "inner"
+        for depth, (marker, angle, title) in enumerate(
+            zip(markers, angles, target_titles)
+        ):
+            target = ("real.md", "image.png", "guide.md")[depth]
+            if angle:
+                target = "<" + target + ">"
+            source = f"{marker}[label {source}]({target}{title})"
+        for context, wrapped in _containers(source):
+            yield f"nested-{n}-{context}", wrapped + "\n\n# Actual\n"
+        yield f"nested-{n}-heading", "# " + source + "\n"
+    # Failed image targets must leave ordinary nested-link rejection in force;
+    # literal punctuation must not create image openers or bracket boundaries.
+    for n, (markers, alt, ending) in enumerate(
+        product(
+            product(("", "!"), repeat=3),
+            ("inner", r"\!inner", r"inner\]", "`inner ]`", "<span>inner</span>"),
+            ("(after.md)", "(absent.md)", "(broken target)", "", r"\(real.md)"),
+        )
+    ):
+        inner, middle, outer = markers
+        source = f"{outer}[{middle}[{inner}[{alt}](real.md)]{ending}](guide.md)"
+        yield f"nested-boundary-{n}", source + "\n\n# Actual\n"
+
+
+CASES = (
+    list(markdown_cases())
+    + list(punctuation_escape_cases())
+    + list(nested_link_image_cases())
+)
 
 
 @pytest.mark.parametrize(("case", "source"), CASES, ids=[case for case, _ in CASES])
@@ -246,6 +289,8 @@ def test_generated_markdown_matches_commonmark(case, source, tmp_path):
         "a b.md",
         "after.md",
         "real.md",
+        "image.png",
+        "guide.md",
     ):
         (tmp_path / name).write_text("")
     (tmp_path / "README.md").write_text(source)
