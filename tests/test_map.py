@@ -227,3 +227,76 @@ def test_gitignore_character_classes_match_git(pattern, tmp_path):
     assert actual == set(paths) - ignored
     if pattern == "[[:digit:]].txt":
         assert "1.txt" in ignored and "a.txt" not in ignored
+
+
+@pytest.mark.parametrize("kind", ("html", "md"))
+@pytest.mark.parametrize("absolute", (False, True))
+def test_link_classification_uses_only_folder_entries(tmp_path, kind, absolute):
+    root = tmp_path / "left" / "folder"
+    root.mkdir(parents=True)
+    outside = root.parent / "outside"
+    outside.mkdir()
+    target = outside / "target.txt"
+    target.write_text("external")
+    (root / "link").symlink_to(
+        str(outside) if absolute else "../outside", target_is_directory=True
+    )
+    (root / "broken").symlink_to("../absent", target_is_directory=True)
+    (root / "local").symlink_to("included", target_is_directory=True)
+    (root / "included").mkdir()
+    (root / "included" / "target.txt").write_text("internal")
+    (root / ".hidden").mkdir()
+    (root / ".hidden" / "target.txt").write_text("hidden")
+    (root / "ignored").mkdir()
+    (root / "ignored" / "target.txt").write_text("ignored")
+    (root / "ignored.txt").write_text("ignored file")
+    (root / ".gitignore").write_text("ignored/\nignored.txt\n")
+    targets = (
+        "link/target.txt",
+        "link",
+        "broken/target.txt",
+        "broken",
+        "local/target.txt",
+        "local",
+        "included/target.txt",
+        "absent.txt",
+        ".hidden/target.txt",
+        "ignored/target.txt",
+        "ignored.txt",
+        "https://example.org/target.txt",
+        "../outside/target.txt",
+    )
+    source = (
+        "".join(f'<a href="{address}">Target</a>' for address in targets)
+        if kind == "html"
+        else "\n".join(f"[Target]({address})" for address in targets)
+    )
+    name = "index." + kind
+    (root / name).write_text(source)
+    original = map_folder(root)
+    moved = tmp_path / "right" / "folder"
+    shutil.copytree(root, moved, symlinks=True)
+    assert (root / "link").readlink() == (moved / "link").readlink()
+    assert map_folder(moved) == original
+    target.unlink()
+    assert map_folder(root) == original
+    assert map_folder(moved) == original
+    target.write_text("restored external content")
+    assert map_folder(root) == original
+    assert map_folder(moved) == original
+    assert edge_paths(original, "REFERENCES") == {
+        (name, address)
+        for address in targets
+        if address not in {".hidden/target.txt", "ignored/target.txt", "ignored.txt"}
+    }
+    nodes = by_path(original)
+    assert {path for path, n in nodes.items() if n["properties"].get("missing")} == {
+        "link/target.txt",
+        "broken/target.txt",
+        "local/target.txt",
+        "absent.txt",
+    }
+    for path in ("link", "broken", "local"):
+        assert nodes[path]["properties"]["kind"] == "symlink"
+    shown = map_folder(root, include_hidden=True)
+    assert (name, ".hidden/target.txt") in edge_paths(shown, "REFERENCES")

@@ -180,7 +180,7 @@ class IgnoreRules:
     def extend(self, directory: Path, relative: str) -> IgnoreRules:
         result = IgnoreRules(self.rules)
         ignore = directory / ".gitignore"
-        if ignore.is_file() and not ignore.is_symlink():
+        if not ignore.is_symlink() and ignore.is_file():
             for raw in ignore.read_bytes().removeprefix(b"\xef\xbb\xbf").split(b"\n"):
                 line = _ignore_line(raw.removesuffix(b"\r"))
                 if not line or line.startswith(b"#"):
@@ -301,6 +301,7 @@ def map_folder(folder: str | Path, *, include_hidden: bool = False) -> dict:
     nodes: dict[str, dict] = {}
     texts: dict[str, str] = {}
     unread: list[dict] = []
+    excluded: set[str] = set()
 
     def node(path: str, kind: str, properties: dict, parent: str | None) -> dict:
         entry: dict = {
@@ -331,12 +332,13 @@ def map_folder(folder: str | Path, *, include_hidden: bool = False) -> dict:
         size = 0
         for child in sorted(directory.iterdir(), key=lambda p: p.name):
             path = child.name if relative == "." else relative + "/" + child.name
-            is_dir = child.is_dir() and not child.is_symlink()
+            is_dir = not child.is_symlink() and child.is_dir()
             if (
                 child.name == ".git"
                 or (is_dir and child.name.startswith(".") and not include_hidden)
                 or rules.ignored(path, is_dir)
             ):
+                excluded.add(path)
                 continue
             if is_dir:
                 walk(child, path, rules, relative)
@@ -415,8 +417,15 @@ def map_folder(folder: str | Path, *, include_hidden: bool = False) -> dict:
                 external = address
             else:
                 if target not in nodes:
-                    # Existing excluded files stay excluded, including through links.
-                    if (root / target).exists():
+                    # Classify only from collected entries and exclusion boundaries.
+                    # No lookup may follow a symlink or inspect an excluded subtree.
+                    if any(
+                        parent.as_posix() in excluded
+                        for parent in (
+                            PurePosixPath(target),
+                            *PurePosixPath(target).parents,
+                        )
+                    ):
                         return
                     node(
                         target,

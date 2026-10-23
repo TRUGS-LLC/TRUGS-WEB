@@ -163,6 +163,15 @@ def _blocks(text: str) -> list[tuple[str, str]]:
             if html_end and re.search(html_end, line, re.I):
                 html = False
             continue
+        # Definitions at the start of a paragraph contribute targets, not text.
+        # Consume them before an underline can turn the paragraph into a heading.
+        if not paragraph and (
+            definition := re.match(r"^\[[^\]]+\]:[ \t]*(.*)$", line.strip())
+        ):
+            target = _destination(definition[1], 0)
+            if target and target[0]:
+                blocks.append(("definition", target[0]))
+                continue
         atx = re.match(r" {0,3}#{1,6}(?:[ \t]+(.*)|$)", line)
         if atx:
             flush()
@@ -345,13 +354,8 @@ def read_markdown(text: str) -> tuple[str | None, list[str]]:
     for kind, content in _blocks(text):
         if kind == "heading" and title is None:
             title = " ".join(line.strip() for line in content.split("\n"))
-        # Keep recording reference-definition targets as well as inline links.
-        lines = content.split("\n")
-        while lines and (definition := re.match(r"^\[[^\]]+\]:[ \t]*(.*)$", lines[0])):
-            target = _destination(definition[1], 0)
-            if not target or not target[0]:
-                break
-            links.append(target[0])
-            lines.pop(0)
-        links.extend(_links("\n".join(lines)))
+        if kind == "definition":
+            links.append(content)
+        else:
+            links.extend(_links(content))
     return title, links

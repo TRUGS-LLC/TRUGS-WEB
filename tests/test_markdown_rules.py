@@ -317,3 +317,73 @@ def test_generated_markdown_matches_commonmark(case, source, tmp_path):
     assert actual == expected
     missing = {p["path"] for p in props.values() if p.get("missing")}
     assert missing == expected_missing
+
+
+def reference_definition_cases():
+    """Definitions precede underlines without becoming heading source text."""
+    for n, (definitions, underline, paragraph, indent) in enumerate(
+        product(
+            (
+                "[a]: guide.md\n",
+                '[a]: <guide.md> "Guide"\n[b]: after.md\n',
+            ),
+            ("-", "---", "=", "==="),
+            ("", "First\n", "First\nsecond\n", "[Link](real.md)\n"),
+            ("", " ", "   "),
+        )
+    ):
+        source = definitions + paragraph + underline + "\n\n# Real\n"
+        source = "\n".join(
+            indent + line if line else line for line in source.split("\n")
+        )
+        for container, wrapped in _containers(source):
+            yield f"definition-setext-{n}-{container}", wrapped
+    for n, source in enumerate(
+        (
+            "[a]: guide.md\n---\n\n# Real\n",
+            "[a]: guide.md\n===\n---\n\n# Real\n",
+            "# [a]: guide.md\n",
+            "Text\n[a]: guide.md\n---\n",
+            "    [a]: guide.md\n---\n\n# Real\n",
+            "```\n[a]: guide.md\n---\n```\n\n# Real\n",
+            "<!--\n[a]: guide.md\n---\n-->\n\n# Real\n",
+        )
+    ):
+        yield f"definition-boundary-{n}", source
+
+
+REFERENCE_CASES = list(reference_definition_cases())
+
+
+@pytest.mark.parametrize(
+    ("case", "source"), REFERENCE_CASES, ids=[case for case, _ in REFERENCE_CASES]
+)
+def test_reference_definition_headings_match_commonmark(case, source, tmp_path):
+    expected_title, inline_links = _reference(source)
+    parser = MarkdownIt("commonmark")
+    parser.validateLink = lambda address: True
+    environment = {}
+    parser.parse(source, environment)
+    definitions = [
+        entry["href"] for entry in environment.get("references", {}).values()
+    ]
+    expected_links = inline_links + definitions
+    title, links = read_markdown(source)
+    assert title == expected_title, (case, source)
+    assert sorted(links) == sorted(expected_links), (case, source)
+    (tmp_path / "README.md").write_text(source)
+    (tmp_path / "guide.md").write_text("")
+    # after.md and real.md deliberately remain absent to check missing targets too.
+    graph = map_folder(tmp_path)
+    props = {node["id"]: node["properties"] for node in graph["nodes"]}
+    entry = next(p for p in props.values() if p.get("path") == "README.md")
+    assert entry.get("title") == expected_title
+    actual = {
+        props[edge["to_id"]]["path"]
+        for edge in graph["edges"]
+        if edge["relation"] == "REFERENCES"
+    }
+    assert actual == set(expected_links)
+    assert {p["path"] for p in props.values() if p.get("missing")} == set(
+        expected_links
+    ) - {"guide.md"}
