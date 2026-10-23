@@ -2,8 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
 
 # Least-privilege token. gitleaks-action's PR mode lists the PR's commits via the
 # API, which needs pull-requests:read (the repo's restricted default grants only
@@ -64,5 +66,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: install (editable, with test extras)
         run: pip install -e ".[test]"   # trugs-tools/trugs-store 2.0.0 final on PyPI
-      - name: pytest (v1 suite)
+      - name: pytest (fixed CommonMark sample)
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        run: pytest -q tests --commonmark-sample
+      - name: pytest (full CommonMark corpus)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: pytest -q tests

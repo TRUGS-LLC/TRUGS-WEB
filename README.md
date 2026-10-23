@@ -57,6 +57,9 @@ These are traversal results, not a web search or an assessment of truth.
 
 Pass a folder to `trugs-web map`. Omit `--out` to print JSON. Choose an output
 outside the folder being described, so the output cannot become its own input.
+After writing the graph, with or without `--out`, `map` prints a line on standard
+error naming https://trugs-llc.github.io/TRUGS-VIEWER/ as a place to open it.
+The line leaves the graph and standard output unchanged; no network is used.
 `--include-hidden` includes hidden folders; `.git` is always excluded. Hidden
 files such as `.gitignore` are included. Each folder's `.gitignore` applies to
 its subtree, including negation and slash-aware wildcards; ignored parent folders
@@ -82,6 +85,13 @@ paragraph. Backtick/tilde fences have at least three matching markers and close
 with at least the opening length. These Markdown rules are checked against
 CommonMark using markdown-it-py in the test suite; other Markdown extensions
 are outside this reader's scope.
+
+Plain `pytest -q tests` runs the full CommonMark differential corpus. Use
+`pytest -q tests --commonmark-sample` for a fixed sample: up to 32 evenly spaced
+cases from each named family, plus every reference-definition case. The sample
+uses sorted case names and is the same on every run. CI uses it on every push
+and pull request; the full suite runs weekly and through `workflow_dispatch`,
+on the same Python matrix. The switch leaves all other tests unchanged.
 
 HTML's title is also recorded, and HTML `href`/`src` produce references.
 Addresses leaving the

@@ -171,6 +171,10 @@ def _cmd_map(args) -> int:
         Path(args.out).write_text(data, encoding="utf-8")
     else:
         print(data, end="")
+    print(
+        "Open the graph in the viewer: https://trugs-llc.github.io/TRUGS-VIEWER/",
+        file=sys.stderr,
+    )
     return 0
 
 

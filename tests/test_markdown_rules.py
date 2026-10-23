@@ -1,13 +1,16 @@
 """Compare generated Markdown folder metadata with CommonMark tokens."""
 
 from itertools import product
+import hashlib
+import json
 import posixpath
 import random
 import string
+import subprocess
+import sys
 from urllib.parse import unquote, urlsplit
 
 from markdown_it import MarkdownIt
-import pytest
 
 from trugs_web.map import map_folder
 from trugs_web.markdown import read_markdown
@@ -274,7 +277,6 @@ CASES = (
 )
 
 
-@pytest.mark.parametrize(("case", "source"), CASES, ids=[case for case, _ in CASES])
 def test_generated_markdown_matches_commonmark(case, source, tmp_path):
     expected_title, expected_links = _reference(source)
     title, links = read_markdown(source)
@@ -355,9 +357,6 @@ def reference_definition_cases():
 REFERENCE_CASES = list(reference_definition_cases())
 
 
-@pytest.mark.parametrize(
-    ("case", "source"), REFERENCE_CASES, ids=[case for case, _ in REFERENCE_CASES]
-)
 def test_reference_definition_headings_match_commonmark(case, source, tmp_path):
     expected_title, inline_links = _reference(source)
     parser = MarkdownIt("commonmark")
@@ -387,3 +386,88 @@ def test_reference_definition_headings_match_commonmark(case, source, tmp_path):
     assert {p["path"] for p in props.values() if p.get("missing")} == set(
         expected_links
     ) - {"guide.md"}
+
+
+# Specific prefixes precede their broader family. Unknown names fail collection
+# so a new generator cannot silently fall outside the sample.
+CASE_FAMILIES = (
+    "inline-boundary",
+    "inline",
+    "block",
+    "unclosed",
+    "indented",
+    "fence",
+    "atx",
+    "setext",
+    "composition",
+    "lazy",
+    "escape-image-marker",
+    "escape-insert",
+    "escape-delimiter",
+    "linked-image-with-link-alt",
+    "nested-boundary",
+    "nested",
+    "definition-setext",
+    "definition-boundary",
+)
+
+
+def case_family(name):
+    for family in CASE_FAMILIES:
+        if name == family or name.startswith(family + "-"):
+            return family
+    raise ValueError(f"Unknown CommonMark case family: {name}")
+
+
+def commonmark_sample(cases):
+    families = {}
+    for case in cases:
+        families.setdefault(case_family(case[0]), []).append(case)
+    selected = []
+    for family, members in sorted(families.items()):
+        members = sorted(members)
+        if family.startswith("definition-") or len(members) <= 32:
+            selected.extend(members)
+        else:
+            selected.extend(members[i * (len(members) - 1) // 31] for i in range(32))
+    return sorted(selected)
+
+
+def pytest_generate_tests(metafunc):
+    if "case" not in metafunc.fixturenames:
+        return
+    cases = (
+        REFERENCE_CASES
+        if metafunc.function.__name__
+        == "test_reference_definition_headings_match_commonmark"
+        else CASES
+    )
+    if metafunc.config.getoption("--commonmark-sample"):
+        cases = commonmark_sample(cases)
+    metafunc.parametrize(("case", "source"), cases, ids=[name for name, _ in cases])
+
+
+def test_commonmark_sample_covers_every_family_and_reference_definition():
+    cases = CASES + REFERENCE_CASES
+    sample = commonmark_sample(cases)
+    assert 0 < len(sample) < len(cases)
+    assert {case_family(name) for name, _ in cases} == set(CASE_FAMILIES)
+    assert {case_family(name) for name, _ in sample} == set(CASE_FAMILIES)
+    assert set(REFERENCE_CASES) <= set(sample) <= set(cases)
+    assert len(sample) == len(set(sample))
+    assert commonmark_sample(list(reversed(cases))) == sample
+
+
+def test_commonmark_sample_is_stable_across_runs():
+    expected = hashlib.sha256(
+        json.dumps(commonmark_sample(CASES + REFERENCE_CASES)).encode()
+    ).hexdigest()
+    code = (
+        "import hashlib, json, runpy; "
+        f"m = runpy.run_path({__file__!r}); "
+        "sample = m['commonmark_sample'](m['CASES'] + m['REFERENCE_CASES']); "
+        "print(hashlib.sha256(json.dumps(sample).encode()).hexdigest())"
+    )
+    for _ in range(2):
+        result = subprocess.check_output([sys.executable, "-c", code], text=True)
+        assert result.strip() == expected

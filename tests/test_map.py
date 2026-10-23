@@ -2,6 +2,7 @@
 
 import json
 import os
+from pathlib import Path
 import shutil
 import subprocess
 
@@ -173,6 +174,33 @@ def test_output_cannot_become_its_own_input(folder, capsys):
 
     assert main(["map", str(folder), "--out", str(folder / "map.trug.json")]) == 1
     assert "outside" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("use_sample", [False, True])
+@pytest.mark.parametrize("write_file", [False, True])
+def test_cli_viewer_address_preserves_graph(
+    folder, tmp_path, capsys, use_sample, write_file
+):
+    from trugs_web.cli import main
+
+    root = Path(__file__).resolve().parents[1] / "examples" if use_sample else folder
+    graph = map_folder(root)
+    expected = json.dumps(graph, indent=2, ensure_ascii=True) + "\n"
+    output = tmp_path / "output.trug.json"
+    args = ["map", str(root)]
+    if write_file:
+        args.extend(["--out", str(output)])
+    assert main(args) == 0
+    captured = capsys.readouterr()
+    assert captured.err == (
+        "Open the graph in the viewer: https://trugs-llc.github.io/TRUGS-VIEWER/\n"
+    )
+    actual = output.read_text() if write_file else captured.out
+    assert actual == expected
+    assert json.loads(actual) == graph
+    assert "https://trugs-llc.github.io/TRUGS-VIEWER/" not in actual
+    if write_file:
+        assert captured.out == ""
 
 
 @pytest.mark.parametrize(
