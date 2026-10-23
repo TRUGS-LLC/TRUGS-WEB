@@ -7,8 +7,8 @@ AGENT publisher MAY READ RESOURCE source.
 ```
 
 Describe a folder as a TRUGS graph, query a graph, or propose a graph from web
-sources. Version **2.1.0**, unreleased; Python 3.11 or later. Install the wheel
-with your Python package installer. `trugs-tools>=2.4.0,<3.0.0` and
+sources. Version **2.1.0**; Python 3.11 or later. Install it from the Python package
+index with `pip install trugs-web`. `trugs-tools>=2.4.0,<3.0.0` and
 `trugs-store>=2.0.0,<3.0.0` are required. The commands below need no model key.
 
 A **hub** is a publisher's graph of sources on a topic, with the sources' titles,
@@ -76,7 +76,11 @@ notation and joins its lines with spaces.
 
 Markdown inline links and images produce references, including bare targets
 with balanced parentheses, backslash-escaped punctuation, and angle-bracket
-targets. Reference-definition targets are also recorded. Code (fenced and
+targets. Reference-definition targets are also recorded. Known limitation: a
+reference definition is recognised one line at a time, so one whose title or
+target continues on the next line, or one with invalid text after its target,
+can give a different first heading or a missing or extra reference than
+CommonMark. Single-line definitions are unaffected. Code (fenced and
 indented), HTML blocks and HTML comments contribute no link and no heading;
 inline code spans and inline HTML tokens contribute no link. List and blockquote
 prefixes are handled before block checks. Headings may have up to three leading
@@ -91,7 +95,10 @@ Plain `pytest -q tests` runs the full CommonMark differential corpus. Use
 cases from each named family, plus every reference-definition case. The sample
 uses sorted case names and is the same on every run. CI uses it on every push
 and pull request; the full suite runs weekly and through `workflow_dispatch`,
-on the same Python matrix. The switch leaves all other tests unchanged.
+on the same Python matrix. The switch leaves all other tests unchanged. The ignore-rule tests
+compare `map` with the installed Git; they were checked with Git 2.53. Older Git
+reads patterns that join `**` to other characters, such as `a**/b`, differently,
+and twelve of those tests then fail.
 
 HTML's title is also recorded, and HTML `href`/`src` produce references.
 Addresses leaving the

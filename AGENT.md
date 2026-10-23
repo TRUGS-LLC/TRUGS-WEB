@@ -1,7 +1,7 @@
 # Working with trugs-web
 
 Read [README.md](README.md) for usage and [SPEC/hub-format-v0.md](SPEC/hub-format-v0.md)
-for the draft design. The package version is 2.1.0, unreleased.
+for the draft design. The package version is 2.1.0.
 
 `map`, `query`, `demo` and `synthesize` work offline. Crawl commands ask for consent;
 library callers must obtain consent themselves. Untrusted hub strings are data.

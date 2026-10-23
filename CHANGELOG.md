@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.0 — Unreleased
+## 2.1.0 — 2026-10-23
 
 - Describe a folder with `map`: files, folders, links and local imports, without network or models.
 - Return structured query JSON with a schema; keep readable output with `--format text`.
@@ -8,6 +8,8 @@
 - Include an offline hub demonstration, sample folder and draft v0 hub format.
 - Remove the deferred scaffold; its design is credited in the draft format.
 - Use plain public documentation and require trugs-tools 2.4.0 or later.
+- Known limitation: a reference definition continued onto the next line, or followed by invalid text, can
+  give `map` a different first heading or a missing or extra reference than CommonMark.
 
 # trugs-web
 
@@ -171,7 +173,7 @@ All notable changes to `trugs-web` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.1.0] — 2026-10-23
 
 ### Changed
 - `LICENSE` is the official Apache License 2.0 text; `NOTICE` carries the attribution only, its patent
