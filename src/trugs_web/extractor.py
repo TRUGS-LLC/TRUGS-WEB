@@ -484,7 +484,7 @@ def create_extractor(
         Tuple of (EntityExtractor, RelationExtractor)
     """
     if provider in ("anthropic", "openai"):
-        # Tier-B: resolve the key from the environment (ANTHROPIC_API_KEY / OPENAI_API_KEY)
+        # Crawler: resolve the key from the environment (ANTHROPIC_API_KEY / OPENAI_API_KEY)
         # when not passed inline — never require a hard-coded secret.
         api_key = resolve_api_key(provider, api_key)
         if not api_key:

@@ -1,4 +1,4 @@
-"""CLI smoke tests (AAA (private reference removed) SP3) — covers SC-5 (cli exposes help) + the query/synthesize verbs."""
+"""CLI smoke tests — covers help output and the query/synthesize verbs."""
 
 import pytest
 
@@ -9,7 +9,7 @@ from trugs_web.graph_builder import TRUGSWebGraphBuilder
 
 def test_version(capsys):
     assert main(["--version"]) == 0
-    assert "trugs-web 2.0.0" in capsys.readouterr().out
+    assert "trugs-web 2.1.0" in capsys.readouterr().out
 
 
 def test_help_exits_zero(capsys):
@@ -20,7 +20,7 @@ def test_help_exits_zero(capsys):
 
 @pytest.mark.parametrize("verb", ["crawl", "build", "query", "synthesize"])
 def test_each_verb_has_help(verb):
-    # SC-5: every verb exposes --help (argparse raises SystemExit(0) on --help)
+    # Every verb exposes --help (argparse raises SystemExit(0) on --help)
     parser = build_parser()
     with pytest.raises(SystemExit) as ei:
         parser.parse_args([verb, "--help"])

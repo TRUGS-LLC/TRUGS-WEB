@@ -33,4 +33,4 @@ When creating or editing any `.trug.json` file, use edge relations and node type
 
 - Start with `folder.trug.json` for machine-readable structure
 - `README.md` for the human quickstart
-- This repo is part of the public TRUGS-LLC commons; release-polish is tracked in `(private reference removed)`.
+- This repository is part of the public TRUGS-LLC collection; see CHANGELOG.md for release notes.

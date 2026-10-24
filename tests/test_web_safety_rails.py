@@ -1,7 +1,7 @@
-"""Tier-B crawler-grade safety rails (AAA (private reference removed) SP4).
+"""Crawler and extractor safety checks.
 
-Marked tests so the Phase-8 vacuity-guarded recipes (SC-6 robots/rate_limit, SC-7 cost,
-SC-8 secret, SC-9 logging) and PC-6 resolve to real, passing tests.
+Check robots rules, retry backoff, cost limits, API key resolution and logging.
+Markers allow each group to run separately.
 """
 
 import asyncio

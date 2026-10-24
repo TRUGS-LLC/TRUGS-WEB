@@ -65,8 +65,7 @@ class SourceDiscoverer:
     """
     Discovers sources starting from seed URLs.
 
-    Uses async HTTP scraping (no LLM) to find and categorize sources. Tier-B safety rails
-    (AAA (private reference removed) SP4): robots.txt politeness (fail-open, enabled by default),
+    Uses async HTTP scraping (no LLM) to find and categorize sources, with robots.txt politeness (fail-open, enabled by default),
     configurable batch preparation delay, and retry backoff. Batch requests run in parallel
     without spacing; the delay does not separate requests.
     """
@@ -80,6 +79,7 @@ class SourceDiscoverer:
         request_delay: float = 0.0,
         respect_robots: bool = True,
         max_retries: int = 2,
+        allow_other_hosts: bool = False,
     ):
         self.max_sources = max_sources
         self.max_depth = max_depth
@@ -88,8 +88,37 @@ class SourceDiscoverer:
         self.request_delay = request_delay
         self.respect_robots = respect_robots
         self.max_retries = max_retries
+        self.allow_other_hosts = allow_other_hosts
+        self._seed_hosts: set[str] | None = None
         self._seen_urls: set = set()
         self._robots_cache: dict = {}
+
+    def _in_scope(self, url: str) -> bool:
+        parts = urlparse(url)
+        hostname = parts.hostname
+        return (
+            parts.scheme in {"http", "https"}
+            and hostname is not None
+            and (
+                self._seed_hosts is None
+                or self.allow_other_hosts
+                or hostname.lower() in self._seed_hosts
+            )
+        )
+
+    async def _get(self, client, url: str):
+        # Never let the transport follow a redirect before checking its host.
+        for _ in range(21):
+            if not self._in_scope(url):
+                raise _OtherHost(url)
+            response = await client.get(url)
+            if (
+                response.status_code not in {301, 302, 303, 307, 308}
+                or "location" not in response.headers
+            ):
+                return response
+            url = urljoin(url, response.headers["location"])
+        raise ValueError("Too many redirects")
 
     async def _can_fetch(self, client, url: str) -> bool:
         """robots.txt politeness, cached per host. **Fail-open**: if robots.txt cannot be
@@ -103,7 +132,7 @@ class SourceDiscoverer:
         if rp is None:
             rp = RobotFileParser()
             try:
-                resp = await client.get(f"{host}/robots.txt")
+                resp = await self._get(client, f"{host}/robots.txt")
                 if resp.status_code == 200:
                     rp.parse(resp.text.splitlines())
                 else:
@@ -140,26 +169,29 @@ class SourceDiscoverer:
                 "Install with: pip install trugs-web[web]"
             ) from exc
 
+        self._seed_hosts = seed_hosts(seed_urls)
+        self._seen_urls.clear()
+        self._robots_cache.clear()
         sources: list = []
         to_visit: list = [(url, 0) for url in seed_urls]
 
         async with httpx.AsyncClient(
             timeout=self.timeout,
             headers={"User-Agent": self.user_agent},
-            follow_redirects=True,
+            follow_redirects=False,
         ) as client:
             while to_visit and len(sources) < self.max_sources:
                 batch: list[tuple[str, int]] = []
                 while to_visit and len(batch) < 10:
                     url, depth = to_visit.pop(0)
-                    if url not in self._seen_urls:
+                    if url not in self._seen_urls and self._in_scope(url):
                         self._seen_urls.add(url)
                         batch.append((url, depth))
 
                 if not batch:
                     break
 
-                # Tier-B: robots checks (default on) + delay before parallel batch fetches
+                # Robots checks (default on) + delay before parallel batch fetches
                 allowed = []
                 for url, depth in batch:
                     if self.respect_robots and not await self._can_fetch(client, url):
@@ -180,7 +212,7 @@ class SourceDiscoverer:
 
                         if result.metadata.get("depth", 0) < self.max_depth:
                             for link in result.outbound_links[:10]:
-                                if link not in self._seen_urls:
+                                if link not in self._seen_urls and self._in_scope(link):
                                     to_visit.append(
                                         (link, result.metadata["depth"] + 1)
                                     )
@@ -205,7 +237,7 @@ class SourceDiscoverer:
         try:
             response = None
             for attempt in range(self.max_retries + 1):
-                response = await client.get(url)
+                response = await self._get(client, url)
                 if (
                     response.status_code in RETRYABLE_STATUS
                     and attempt < self.max_retries
@@ -240,8 +272,9 @@ class SourceDiscoverer:
                 content_val = meta_desc.get("content", "")
                 description = content_val if isinstance(content_val, str) else ""
 
+            # Content filtering removes navigation elements, so discover their links first.
+            links = self._extract_links(soup, str(response.url))
             content = self._extract_content(soup)
-            links = self._extract_links(soup, url)
             source_type = self._classify_source(url, soup)
 
             return Source(
@@ -257,6 +290,12 @@ class SourceDiscoverer:
                 },
             )
 
+        except _OtherHost as exc:
+            return Source(
+                url=url,
+                outbound_links=[exc.url],
+                metadata={"depth": depth, "not_fetched": exc.url},
+            )
         except Exception as exc:
             logger.warning("fetch failed for %s: %s", url, exc)
             return None
@@ -308,6 +347,7 @@ async def discover_sources(
     seed_urls: list,
     topic: str = "",
     max_sources: int = 50,
+    allow_other_hosts: bool = False,
 ) -> list:
     """
     Convenience function to discover sources.
@@ -321,5 +361,23 @@ async def discover_sources(
     Returns:
         List of Source objects
     """
-    discoverer = SourceDiscoverer(max_sources=max_sources)
+    discoverer = SourceDiscoverer(
+        max_sources=max_sources, allow_other_hosts=allow_other_hosts
+    )
     return await discoverer.discover(seed_urls, topic)
+
+
+class _OtherHost(Exception):
+    def __init__(self, url: str):
+        self.url = url
+        super().__init__("Host outside consent scope")
+
+
+def seed_hosts(urls: list[str]) -> set[str]:
+    hosts = set()
+    for url in urls:
+        parts = urlparse(url)
+        if parts.scheme not in {"http", "https"} or not parts.hostname:
+            raise ValueError("Seeds must be HTTP or HTTPS URLs with a host")
+        hosts.add(parts.hostname.lower())
+    return hosts

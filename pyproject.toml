@@ -4,15 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trugs-web"
-version = "2.0.0"
-description = "TRUGS web research tool — crawl web sources and build passive TRUGS knowledge graphs. One-way and passive: it builds graphs, it never closes the self-developing loop. Single `trugs-web` binary."
+version = "2.1.0"
+description = "Describe folders, query TRUGS graphs and build research graphs from web sources."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
 authors = [{ name = "TRUGS LLC" }]
 keywords = ["trugs", "web", "crawler", "knowledge-graph", "research", "cli"]
 classifiers = [
-    # 2.0 launches as Beta (parity with trugs-folder / trugs-tools).
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
@@ -22,10 +21,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
 ]
-# T2 sits ABOVE T1: depends on the language core (trugs-tools) + the graph store
-# (trugs-store). It NEVER depends on any T3 system package (the AAA (private reference removed) cleave invariant).
+# Uses the language core and graph store.
 dependencies = [
-    "trugs-tools>=2.0.0,<3.0.0",
+    "trugs-tools>=2.4.0,<3.0.0",
     # Declared even though nothing in this package imports it directly: trugs-tools
     # requires trugs-store and declares it unbounded, so this line is what carries
     # the upper bound for trugs-store. Removing it would silently un-bound it.
@@ -37,9 +35,11 @@ web = ["httpx>=0.24", "beautifulsoup4>=4.9", "lxml>=4.9"]
 llm = ["anthropic>=0.7", "openai>=1.0"]
 test = [
     "pytest>=7.0",
+    "markdown-it-py>=4.2,<5",
     "pytest-cov>=4.0",
     "pytest-asyncio>=0.20",
     "respx>=0.20",
+    "jsonschema>=4",
     "httpx>=0.24",
     "beautifulsoup4>=4.9",
 ]
@@ -59,17 +59,20 @@ license-files = ["LICENSE", "NOTICE"]   # dists carry the Apache license + attri
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["trugs_web*"]   # excludes deferred_phase2/ (hub, refresh) from the v1 wheel
+include = ["trugs_web*"]
+
+[tool.setuptools.package-data]
+trugs_web = ["data/**/*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]      # v1 test suite only; deferred_phase2/tests held for Phase 2
+testpaths = ["tests"]
 markers = [
-    "robots: crawler robots.txt / politeness behavior (SP4)",
-    "rate_limit: crawler rate-limit / backoff behavior (SP4)",
-    "cost: LLM cost-guard / budget behavior (SP4)",
-    "secret: API-key-from-environment behavior (SP4)",
-    "logging: structured logging / error-context behavior (SP4)",
-    "graph_validation_e2e: end-to-end TRUG build + validate_trug() check (SP2)",
+    "robots: crawler robots.txt / politeness behavior",
+    "rate_limit: crawler rate-limit / backoff behavior",
+    "cost: LLM cost-guard / budget behavior",
+    "secret: API-key-from-environment behavior",
+    "logging: structured logging / error-context behavior",
+    "graph_validation_e2e: end-to-end TRUG build + validate_trug() check",
 ]
 
 [tool.ruff.lint]

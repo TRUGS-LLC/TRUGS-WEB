@@ -1,19 +1,9 @@
-"""
-trugs-web — a one-way, passive web-to-TRUG builder.
+"""Describe folders, query graphs and build research graphs.
 
-Crawl web sources, extract entities/relations (LLM-backed), resolve, score credibility, and
-build a passive TRUGS knowledge graph for querying. It builds graphs; it never closes the
-self-developing loop (the reserved patent mechanism).
-
-v1 ships: ingestion (crawler, extractor, resolver, credibility, graph_builder), query, weight.
-Hub federation and refresh are deferred to Phase 2 (see deferred_phase2/).
-
-Optional dependencies:
-  - pip install "trugs-web[web]"   → httpx, beautifulsoup4, lxml   (crawling)
-  - pip install "trugs-web[llm]"   → anthropic, openai             (LLM extraction)
+Web crawling and model extraction use optional dependencies.
 """
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 from .crawler import Source, SourceDiscoverer, discover_sources
 from .extractor import (

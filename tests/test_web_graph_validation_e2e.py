@@ -1,8 +1,8 @@
-"""T1.11 — graph-validation end-to-end (AAA (private reference removed) SP2).
+"""graph-validation end-to-end.
 
-Closes the SC-4 grep-only gap and makes validation (which save(validate=False) bypasses)
-explicit: build a TRUG with TRUGSWebGraphBuilder, prove `trugs_tools.validator.validate_trug`
-is actually invoked on the emitted graph, and assert the result is VALID.
+Makes validation (which save(validate=False) bypasses) explicit: build a TRUG with
+TRUGSWebGraphBuilder, prove `trugs_tools.validator.validate_trug` is actually invoked
+on the emitted graph, and assert the result is VALID.
 """
 
 import pytest

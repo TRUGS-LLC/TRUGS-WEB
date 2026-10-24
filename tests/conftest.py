@@ -6,6 +6,14 @@ from trugs_web.graph_builder import TRUGSWebGraphBuilder
 from trugs_web.query.loader import GraphLoader
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--commonmark-sample",
+        action="store_true",
+        help="use a fixed CommonMark sample, keeping every reference-definition case",
+    )
+
+
 def _make_trugs_graph():
     """Build a minimal TRUGS graph dict for testing."""
     builder = TRUGSWebGraphBuilder(name="test-graph", topic="testing")
